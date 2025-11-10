@@ -1,5 +1,5 @@
 {
-        "name": "f67f2.Trojan.exe",
+        "name": "f27ff.Hack.exe",
         "versions": {
                 "attack": "16",
                 "navigator": "5.1.0",
@@ -31,7 +31,7 @@
         "hideDisabled": false,
         "techniques": [
                 {
-                        "techniqueID": "T1071",
+                        "techniqueID": "T1057",
                         "color": "#e60d0d",
                         "comment": "",
                         "enabled": true,
@@ -39,7 +39,7 @@
                         "showSubtechniques": true
                 },
                 {
-                        "techniqueID": "T1497.001",
+                        "techniqueID": "T1071",
                         "color": "#e60d0d",
                         "comment": "",
                         "enabled": true,
@@ -55,7 +55,15 @@
                         "showSubtechniques": true
                 },
                 {
-                        "techniqueID": "T1140",
+                        "techniqueID": "T1518",
+                        "color": "#e60d0d",
+                        "comment": "",
+                        "enabled": true,
+                        "metadata": [],
+                        "showSubtechniques": true
+                },
+                {
+                        "techniqueID": "T1027.005",
                         "color": "#e60d0d",
                         "comment": "",
                         "enabled": true,
@@ -71,7 +79,7 @@
                         "showSubtechniques": true
                 },
                 {
-                        "techniqueID": "T1106",
+                        "techniqueID": "T1129",
                         "color": "#e60d0d",
                         "comment": "",
                         "enabled": true,
@@ -79,7 +87,15 @@
                         "showSubtechniques": true
                 },
                 {
-                        "techniqueID": "T1620",
+                        "techniqueID": "T1614",
+                        "color": "#e60d0d",
+                        "comment": "",
+                        "enabled": true,
+                        "metadata": [],
+                        "showSubtechniques": true
+                },
+                {
+                        "techniqueID": "T1063",
                         "color": "#e60d0d",
                         "comment": "",
                         "enabled": true,
@@ -88,22 +104,6 @@
                 },
                 {
                         "techniqueID": "T1083",
-                        "color": "#e60d0d",
-                        "comment": "",
-                        "enabled": true,
-                        "metadata": [],
-                        "showSubtechniques": true
-                },
-                {
-                        "techniqueID": "T1497",
-                        "color": "#e60d0d",
-                        "comment": "",
-                        "enabled": true,
-                        "metadata": [],
-                        "showSubtechniques": true
-                },
-                {
-                        "techniqueID": "T1055",
                         "color": "#e60d0d",
                         "comment": "",
                         "enabled": true,

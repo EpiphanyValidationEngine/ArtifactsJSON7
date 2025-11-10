@@ -1,1619 +1,353 @@
 {
-  "data": {
-    "CAPA": {
-      "tactics": [
-        {
-          "id": "TA0005",
-          "name": "Defense Evasion",
-          "link": "https://attack.mitre.org/tactics/TA0005/",
-          "description": "The adversary is trying to avoid being detected.\n\nDefense Evasion consists of techniques that adversaries use to avoid detection throughout their compromise. Techniques used for defense evasion include uninstalling/disabling security software or obfuscating/encrypting data and scripts. Adversaries also leverage and abuse trusted processes to hide and masquerade their malware. Other tactics\u2019 techniques are cross-listed here when those techniques include the added benefit of subverting defenses. ",
-          "techniques": [
-            {
-              "id": "T1620",
-              "name": "Reflective Code Loading",
-              "link": "https://attack.mitre.org/techniques/T1620/",
-              "description": "Adversaries may reflectively load code into a process in order to conceal the execution of malicious payloads. Reflective loading involves allocating then executing payloads directly within the memory of the process, vice creating a thread or process backed by a file path on disk (e.g., Shared Modules).\nReflectively loaded payloads may be compiled binaries, anonymous files (only present in RAM), or just snubs of fileless executable code (ex: position-independent shellcode). For example, the Assembly.Load() method executed by PowerShell may be abused to load raw code into the running process.\nReflective code injection is very similar to Process Injection except that the \u201cinjection\u201d loads code into the processes\u2019 own memory instead of that of a separate process. Reflective loading may evade process-based detections since the execution of the arbitrary code may be masked within a legitimate or otherwise benign process. Reflectively loading payloads directly into memory may also avoid creating files or other artifacts on disk, while also enabling malware to keep these payloads encrypted (or otherwise obfuscated) until execution.",
-              "signatures": [
-                {
-                  "severity": "INFO",
-                  "description": "invoke .NET assembly method",
-                  "match_data": [
-                    "api: System.Reflection.MethodBase::Invoke",
-                    "api: System.Type::GetMethod",
-                    "api: System.Type::InvokeMember"
-                  ]
-                },
-                {
-                  "severity": "INFO",
-                  "description": "load .NET assembly",
-                  "match_data": [
-                    "api: System.AppDomain::Load",
-                    "api: System.Reflection.Assembly::Load"
-                  ]
-                }
-              ]
-            },
-            {
-              "id": "T1140",
-              "name": "Deobfuscate/Decode Files or Information",
-              "link": "https://attack.mitre.org/techniques/T1140/",
-              "description": "Adversaries may use Obfuscated Files or Information to hide artifacts of an intrusion from analysis. They may require separate mechanisms to decode or deobfuscate that information depending on how they intend to use it. Methods for doing that include built-in functionality of malware or by using utilities present on the system.\nOne such example is the use of certutil to decode a remote access tool portable executable file that has been hidden inside a certificate file. Another example is using the Windows copy /b or type command to reassemble binary fragments into a malicious payload.\nSometimes a user's action may be required to open it for deobfuscation or decryption as part of User Execution. The user may also be required to input a password to open a password protected compressed/encrypted file that was provided by the adversary.",
-              "signatures": [
-                {
-                  "severity": "INFO",
-                  "description": "decode data using Base64 in .NET",
-                  "match_data": [
-                    "api: System.Convert::FromBase64String"
-                  ]
-                }
-              ]
-            }
-          ]
-        }
-      ]
-    },
-    "CAPE Sandbox": {
-      "tactics": [
-        {
-          "id": "TA0006",
-          "name": "Credential Access",
-          "link": "https://attack.mitre.org/tactics/TA0006/",
-          "description": "The adversary is trying to steal account names and passwords.\n\nCredential Access consists of techniques for stealing credentials like account names and passwords. Techniques used to get credentials include keylogging or credential dumping. Using legitimate credentials can give adversaries access to systems, make them harder to detect, and provide the opportunity to create more accounts to help achieve their goals.",
-          "techniques": [
-            {
-              "id": "T1003",
-              "name": "OS Credential Dumping",
-              "link": "https://attack.mitre.org/techniques/T1003/",
-              "description": "Adversaries may attempt to dump credentials to obtain account login and credential material, normally in the form of a hash or a clear text password. Credentials can be obtained from OS caches, memory, or structures. Credentials can then be used to perform Lateral Movement and access restricted information.\nSeveral of the tools mentioned in associated sub-techniques may be used by both adversaries and professional security testers. Additional custom tools likely exist as well.",
-              "signatures": [
-                {
-                  "severity": "MEDIUM",
-                  "description": "Harvests information related to installed mail clients",
-                  "match_data": [
-                    "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Office\\16.0\\Outlook\\Profiles\\Outlook\\9375CFF0413111d3B88A00104B2A6676\\00000002\\HTTP Password",
-                    "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Office\\16.0\\Outlook\\Profiles\\Outlook\\9375CFF0413111d3B88A00104B2A6676\\00000002\\SMTP Password",
-                    "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Office\\16.0\\Outlook\\Profiles\\Outlook\\9375CFF0413111d3B88A00104B2A6676\\00000002\\POP3 Password",
-                    "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Office\\16.0\\Outlook\\Profiles\\Outlook\\9375CFF0413111d3B88A00104B2A6676\\00000001\\HTTP Password",
-                    "HKEY_CURRENT_USER\\Software\\Microsoft\\Office\\16.0\\Outlook\\Profiles\\Outlook\\9375CFF0413111d3B88A00104B2A6676"
-                  ]
-                },
-                {
-                  "severity": "MEDIUM",
-                  "description": "Harvests information related to installed instant messenger clients",
-                  "match_data": [
-                    "C:\\Users\\Bruno\\AppData\\Roaming\\.purple\\accounts.xml"
-                  ]
-                },
-                {
-                  "severity": "MEDIUM",
-                  "description": "Harvests credentials from local FTP client softwares",
-                  "match_data": [
-                    "C:\\Users\\Bruno\\AppData\\Roaming\\FileZilla\\recentservers.xml"
-                  ]
-                }
-              ]
-            },
-            {
-              "id": "T1552",
-              "name": "Unsecured Credentials",
-              "link": "https://attack.mitre.org/techniques/T1552/",
-              "description": "Adversaries may search compromised systems to find and obtain insecurely stored credentials. These credentials can be stored and/or misplaced in many locations on a system, including plaintext files (e.g. Shell History), operating system or application-specific repositories (e.g. Credentials in Registry),  or other specialized files/artifacts (e.g. Private Keys).",
-              "signatures": [
-                {
-                  "severity": "MEDIUM",
-                  "description": "Harvests information related to installed mail clients",
-                  "match_data": [
-                    "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Office\\16.0\\Outlook\\Profiles\\Outlook\\9375CFF0413111d3B88A00104B2A6676\\00000002\\HTTP Password",
-                    "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Office\\16.0\\Outlook\\Profiles\\Outlook\\9375CFF0413111d3B88A00104B2A6676\\00000002\\SMTP Password",
-                    "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Office\\16.0\\Outlook\\Profiles\\Outlook\\9375CFF0413111d3B88A00104B2A6676\\00000002\\POP3 Password",
-                    "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Office\\16.0\\Outlook\\Profiles\\Outlook\\9375CFF0413111d3B88A00104B2A6676\\00000001\\HTTP Password",
-                    "HKEY_CURRENT_USER\\Software\\Microsoft\\Office\\16.0\\Outlook\\Profiles\\Outlook\\9375CFF0413111d3B88A00104B2A6676"
-                  ]
-                },
-                {
-                  "severity": "MEDIUM",
-                  "description": "Harvests information related to installed instant messenger clients",
-                  "match_data": [
-                    "C:\\Users\\Bruno\\AppData\\Roaming\\.purple\\accounts.xml"
-                  ]
-                },
-                {
-                  "severity": "MEDIUM",
-                  "description": "Harvests credentials from local FTP client softwares",
-                  "match_data": [
-                    "C:\\Users\\Bruno\\AppData\\Roaming\\FileZilla\\recentservers.xml"
-                  ]
-                }
-              ]
-            },
-            {
-              "id": "T1552.001",
-              "name": "Credentials In Files",
-              "link": "https://attack.mitre.org/techniques/T1552/001/",
-              "description": "Adversaries may search local file systems and remote file shares for files containing insecurely stored credentials. These can be files created by users to store their own credentials, shared credential stores for a group of individuals, configuration files containing passwords for a system or service, or source code/binary files containing embedded passwords.\nIt is possible to extract passwords from backups or saved virtual machines through OS Credential Dumping. Passwords may also be obtained from Group Policy Preferences stored on the Windows Domain Controller.\nIn cloud and/or containerized environments, authenticated user and service account credentials are often stored in local configuration and credential files. They may also be found as parameters to deployment commands in container logs. In some cases, these files can be copied and reused on another machine or the contents can be read and then used to authenticate without needing to copy any files.",
-              "signatures": [
-                {
-                  "severity": "MEDIUM",
-                  "description": "Harvests information related to installed mail clients",
-                  "match_data": [
-                    "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Office\\16.0\\Outlook\\Profiles\\Outlook\\9375CFF0413111d3B88A00104B2A6676\\00000002\\HTTP Password",
-                    "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Office\\16.0\\Outlook\\Profiles\\Outlook\\9375CFF0413111d3B88A00104B2A6676\\00000002\\SMTP Password",
-                    "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Office\\16.0\\Outlook\\Profiles\\Outlook\\9375CFF0413111d3B88A00104B2A6676\\00000002\\POP3 Password",
-                    "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Office\\16.0\\Outlook\\Profiles\\Outlook\\9375CFF0413111d3B88A00104B2A6676\\00000001\\HTTP Password",
-                    "HKEY_CURRENT_USER\\Software\\Microsoft\\Office\\16.0\\Outlook\\Profiles\\Outlook\\9375CFF0413111d3B88A00104B2A6676"
-                  ]
-                },
-                {
-                  "severity": "MEDIUM",
-                  "description": "Harvests information related to installed instant messenger clients",
-                  "match_data": [
-                    "C:\\Users\\Bruno\\AppData\\Roaming\\.purple\\accounts.xml"
-                  ]
-                },
-                {
-                  "severity": "MEDIUM",
-                  "description": "Harvests credentials from local FTP client softwares",
-                  "match_data": [
-                    "C:\\Users\\Bruno\\AppData\\Roaming\\FileZilla\\recentservers.xml"
-                  ]
-                }
-              ]
-            }
-          ]
+        "name": "efd85.Spy.exe",
+        "versions": {
+                "attack": "16",
+                "navigator": "5.1.0",
+                "layer": "4.5"
         },
-        {
-          "id": "TA0009",
-          "name": "Collection",
-          "link": "https://attack.mitre.org/tactics/TA0009/",
-          "description": "The adversary is trying to gather data of interest to their goal.\n\nCollection consists of techniques adversaries may use to gather information and the sources information is collected from that are relevant to following through on the adversary's objectives. Frequently, the next goal after collecting data is to either steal (exfiltrate) the data or to use the data to gain more information about the target environment. Common target sources include various drive types, browsers, audio, video, and email. Common collection methods include capturing screenshots and keyboard input.",
-          "techniques": [
-            {
-              "id": "T1114",
-              "name": "Email Collection",
-              "link": "https://attack.mitre.org/techniques/T1114/",
-              "description": "Adversaries may target user email to collect sensitive information. Emails may contain sensitive data, including trade secrets or personal information, that can prove valuable to adversaries. Emails may also contain details of ongoing incident response operations, which may allow adversaries to adjust their techniques in order to maintain persistence or evade defenses. Adversaries can collect or forward email from mail servers or clients. ",
-              "signatures": [
-                {
-                  "severity": "MEDIUM",
-                  "description": "Harvests information related to installed mail clients",
-                  "match_data": [
-                    "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Office\\16.0\\Outlook\\Profiles\\Outlook\\9375CFF0413111d3B88A00104B2A6676\\00000002\\HTTP Password",
-                    "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Office\\16.0\\Outlook\\Profiles\\Outlook\\9375CFF0413111d3B88A00104B2A6676\\00000002\\SMTP Password",
-                    "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Office\\16.0\\Outlook\\Profiles\\Outlook\\9375CFF0413111d3B88A00104B2A6676\\00000002\\POP3 Password",
-                    "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Office\\16.0\\Outlook\\Profiles\\Outlook\\9375CFF0413111d3B88A00104B2A6676\\00000001\\HTTP Password",
-                    "HKEY_CURRENT_USER\\Software\\Microsoft\\Office\\16.0\\Outlook\\Profiles\\Outlook\\9375CFF0413111d3B88A00104B2A6676"
-                  ]
-                }
-              ]
-            },
-            {
-              "id": "T1005",
-              "name": "Data from Local System",
-              "link": "https://attack.mitre.org/techniques/T1005/",
-              "description": "Adversaries may search local system sources, such as file systems, configuration files, local databases, virtual machine files, or process memory, to find files of interest and sensitive data prior to Exfiltration.\nAdversaries may do this using a Command and Scripting Interpreter, such as cmd as well as a Network Device CLI, which have functionality to interact with the file system to gather information. Adversaries may also use Automated Collection on the local system.",
-              "signatures": [
-                {
-                  "severity": "MEDIUM",
-                  "description": "Harvests information related to installed mail clients",
-                  "match_data": [
-                    "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Office\\16.0\\Outlook\\Profiles\\Outlook\\9375CFF0413111d3B88A00104B2A6676\\00000002\\HTTP Password",
-                    "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Office\\16.0\\Outlook\\Profiles\\Outlook\\9375CFF0413111d3B88A00104B2A6676\\00000002\\SMTP Password",
-                    "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Office\\16.0\\Outlook\\Profiles\\Outlook\\9375CFF0413111d3B88A00104B2A6676\\00000002\\POP3 Password",
-                    "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Office\\16.0\\Outlook\\Profiles\\Outlook\\9375CFF0413111d3B88A00104B2A6676\\00000001\\HTTP Password",
-                    "HKEY_CURRENT_USER\\Software\\Microsoft\\Office\\16.0\\Outlook\\Profiles\\Outlook\\9375CFF0413111d3B88A00104B2A6676"
-                  ]
-                },
-                {
-                  "severity": "MEDIUM",
-                  "description": "Harvests information related to installed instant messenger clients",
-                  "match_data": [
-                    "C:\\Users\\Bruno\\AppData\\Roaming\\.purple\\accounts.xml"
-                  ]
-                },
-                {
-                  "severity": "MEDIUM",
-                  "description": "Harvests credentials from local FTP client softwares",
-                  "match_data": [
-                    "C:\\Users\\Bruno\\AppData\\Roaming\\FileZilla\\recentservers.xml"
-                  ]
-                }
-              ]
-            }
-          ]
+        "domain": "enterprise-attack",
+        "description": "",
+        "filters": {
+                "platforms": [
+                        "Linux",
+                        "macOS",
+                        "Windows",
+                        "Office 365",
+                        "Azure AD",
+                        "AWS",
+                        "GCP",
+                        "Azure",
+                        "SaaS",
+                        "PRE",
+                        "Network"
+                ]
         },
-        {
-          "id": "TA0003",
-          "name": "Persistence",
-          "link": "https://attack.mitre.org/tactics/TA0003/",
-          "description": "The adversary is trying to maintain their foothold.\n\nPersistence consists of techniques that adversaries use to keep access to systems across restarts, changed credentials, and other interruptions that could cut off their access. Techniques used for persistence include any access, action, or configuration changes that let them maintain their foothold on systems, such as replacing or hijacking legitimate code or adding startup code. ",
-          "techniques": [
-            {
-              "id": "T1547",
-              "name": "Boot or Logon Autostart Execution",
-              "link": "https://attack.mitre.org/techniques/T1547/",
-              "description": "Adversaries may configure system settings to automatically execute a program during system boot or logon to maintain persistence or gain higher-level privileges on compromised systems. Operating systems may have mechanisms for automatically running a program on system boot or account logon. These mechanisms may include automatically executing programs that are placed in specially designated directories or are referenced by repositories that store configuration information, such as the Windows Registry. An adversary may achieve the same goal by modifying or extending features of the kernel.\nSince some boot or logon autostart programs run with higher privileges, an adversary may leverage these to elevate privileges.",
-              "signatures": [
-                {
-                  "severity": "MEDIUM",
-                  "description": "Installs itself for autorun at Windows startup",
-                  "match_data": [
-                    "pid: 5336"
-                  ]
-                }
-              ]
-            },
-            {
-              "id": "T1547.001",
-              "name": "Registry Run Keys / Startup Folder",
-              "link": "https://attack.mitre.org/techniques/T1547/001/",
-              "description": "Adversaries may achieve persistence by adding a program to a startup folder or referencing it with a Registry run key. Adding an entry to the \"run keys\" in the Registry or startup folder will cause the program referenced to be executed when a user logs in. These programs will be executed under the context of the user and will have the account's associated permissions level.\nThe following run keys are created by default on Windows systems:\n\nHKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run\nHKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\RunOnce\nHKEY_LOCAL_MACHINE\\Software\\Microsoft\\Windows\\CurrentVersion\\Run\nHKEY_LOCAL_MACHINE\\Software\\Microsoft\\Windows\\CurrentVersion\\RunOnce\n\nRun keys may exist under multiple hives. The HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Windows\\CurrentVersion\\RunOnceEx is also available but is not created by default on Windows Vista and newer. Registry run key entries can reference programs directly or list them as a dependency. For example, it is possible to load a DLL at logon using a \"Depend\" key with RunOnceEx: reg add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnceEx\\0001\\Depend /v 1 /d \"C:\\temp\\evil[.]dll\" \nPlacing a program within a startup folder will also cause that program to execute when a user logs in. There is a startup folder location for individual user accounts as well as a system-wide startup folder that will be checked regardless of which user account logs in. The startup folder path for the current user is C:\\Users\\[Username]\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup. The startup folder path for all users is C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp.\nThe following Registry keys can be used to set startup folder items for persistence:\n\nHKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\User Shell Folders\nHKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders\nHKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders\nHKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\User Shell Folders\n\nThe following Registry keys can control automatic startup of services during boot:\n\nHKEY_LOCAL_MACHINE\\Software\\Microsoft\\Windows\\CurrentVersion\\RunServicesOnce\nHKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\RunServicesOnce\nHKEY_LOCAL_MACHINE\\Software\\Microsoft\\Windows\\CurrentVersion\\RunServices\nHKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\RunServices\n\nUsing policy settings to specify startup programs creates corresponding values in either of two Registry keys:\n\nHKEY_LOCAL_MACHINE\\Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\Run\nHKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\Run\n\nPrograms listed in the load value of the registry key HKEY_CURRENT_USER\\Software\\Microsoft\\Windows NT\\CurrentVersion\\Windows run automatically for the currently logged-on user.\nBy default, the multistring BootExecute value of the registry key HKEY_LOCAL_MACHINE\\System\\CurrentControlSet\\Control\\Session Manager is set to autocheck autochk *. This value causes Windows, at startup, to check the file-system integrity of the hard disks if the system has been shut down abnormally. Adversaries can add other programs or processes to this registry value which will automatically launch at boot.\nAdversaries can use these configuration locations to execute malware, such as remote access tools, to maintain persistence through system reboots. Adversaries may also use Masquerading to make the Registry entries look as if they are associated with legitimate programs.",
-              "signatures": [
-                {
-                  "severity": "MEDIUM",
-                  "description": "Installs itself for autorun at Windows startup",
-                  "match_data": [
-                    "pid: 5336"
-                  ]
-                }
-              ]
-            },
-            {
-              "id": "T1112",
-              "name": "Modify Registry",
-              "link": "https://attack.mitre.org/techniques/T1112/",
-              "description": "Adversaries may interact with the Windows Registry as part of a variety of other techniques to aid in defense evasion, persistence, and execution.\nAccess to specific areas of the Registry depends on account permissions, with some keys requiring administrator-level access. The built-in Windows command-line utility Reg may be used for local or remote Registry modification. Other tools, such as remote access tools, may also contain functionality to interact with the Registry through the Windows API.\nThe Registry may be modified in order to hide configuration information or malicious payloads via Obfuscated Files or Information. The Registry may also be modified to Impair Defenses, such as by enabling macros for all Microsoft Office products, allowing privilege escalation without alerting the user, increasing the maximum number of allowed outbound requests, and/or modifying systems to store plaintext credentials in memory.\nThe Registry of a remote system may be modified to aid in execution of files as part of lateral movement. It requires the remote Registry service to be running on the target system. Often Valid Accounts are required, along with access to the remote system's SMB/Windows Admin Shares for RPC communication.\nFinally, Registry modifications may also include actions to hide keys, such as prepending key names with a null character, which will cause an error and/or be ignored when read via Reg or other utilities using the Win32 API. Adversaries may abuse these pseudo-hidden keys to conceal payloads/commands used to maintain persistence.",
-              "signatures": [
-                {
-                  "severity": "MEDIUM",
-                  "description": "Installs itself for autorun at Windows startup",
-                  "match_data": [
-                    "pid: 5336"
-                  ]
-                }
-              ]
-            }
-          ]
+        "sorting": 0,
+        "layout": {
+                "layout": "flat",
+                "showID": false,
+                "showName": true
         },
-        {
-          "id": "TA0004",
-          "name": "Privilege Escalation",
-          "link": "https://attack.mitre.org/tactics/TA0004/",
-          "description": "The adversary is trying to gain higher-level permissions.\n\nPrivilege Escalation consists of techniques that adversaries use to gain higher-level permissions on a system or network. Adversaries can often enter and explore a network with unprivileged access but require elevated permissions to follow through on their objectives. Common approaches are to take advantage of system weaknesses, misconfigurations, and vulnerabilities. Examples of elevated access include: \n\n* SYSTEM/root level\n* local administrator\n* user account with admin-like access \n* user accounts with access to specific system or perform specific function\n\nThese techniques often overlap with Persistence techniques, as OS features that let an adversary persist can execute in an elevated context.  ",
-          "techniques": [
-            {
-              "id": "T1547",
-              "name": "Boot or Logon Autostart Execution",
-              "link": "https://attack.mitre.org/techniques/T1547/",
-              "description": "Adversaries may configure system settings to automatically execute a program during system boot or logon to maintain persistence or gain higher-level privileges on compromised systems. Operating systems may have mechanisms for automatically running a program on system boot or account logon. These mechanisms may include automatically executing programs that are placed in specially designated directories or are referenced by repositories that store configuration information, such as the Windows Registry. An adversary may achieve the same goal by modifying or extending features of the kernel.\nSince some boot or logon autostart programs run with higher privileges, an adversary may leverage these to elevate privileges.",
-              "signatures": [
+        "hideDisabled": false,
+        "techniques": [
                 {
-                  "severity": "MEDIUM",
-                  "description": "Installs itself for autorun at Windows startup",
-                  "match_data": [
-                    "pid: 5336"
-                  ]
-                }
-              ]
-            },
-            {
-              "id": "T1547.001",
-              "name": "Registry Run Keys / Startup Folder",
-              "link": "https://attack.mitre.org/techniques/T1547/001/",
-              "description": "Adversaries may achieve persistence by adding a program to a startup folder or referencing it with a Registry run key. Adding an entry to the \"run keys\" in the Registry or startup folder will cause the program referenced to be executed when a user logs in. These programs will be executed under the context of the user and will have the account's associated permissions level.\nThe following run keys are created by default on Windows systems:\n\nHKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run\nHKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\RunOnce\nHKEY_LOCAL_MACHINE\\Software\\Microsoft\\Windows\\CurrentVersion\\Run\nHKEY_LOCAL_MACHINE\\Software\\Microsoft\\Windows\\CurrentVersion\\RunOnce\n\nRun keys may exist under multiple hives. The HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Windows\\CurrentVersion\\RunOnceEx is also available but is not created by default on Windows Vista and newer. Registry run key entries can reference programs directly or list them as a dependency. For example, it is possible to load a DLL at logon using a \"Depend\" key with RunOnceEx: reg add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnceEx\\0001\\Depend /v 1 /d \"C:\\temp\\evil[.]dll\" \nPlacing a program within a startup folder will also cause that program to execute when a user logs in. There is a startup folder location for individual user accounts as well as a system-wide startup folder that will be checked regardless of which user account logs in. The startup folder path for the current user is C:\\Users\\[Username]\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup. The startup folder path for all users is C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp.\nThe following Registry keys can be used to set startup folder items for persistence:\n\nHKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\User Shell Folders\nHKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders\nHKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders\nHKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\User Shell Folders\n\nThe following Registry keys can control automatic startup of services during boot:\n\nHKEY_LOCAL_MACHINE\\Software\\Microsoft\\Windows\\CurrentVersion\\RunServicesOnce\nHKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\RunServicesOnce\nHKEY_LOCAL_MACHINE\\Software\\Microsoft\\Windows\\CurrentVersion\\RunServices\nHKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\RunServices\n\nUsing policy settings to specify startup programs creates corresponding values in either of two Registry keys:\n\nHKEY_LOCAL_MACHINE\\Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\Run\nHKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\Run\n\nPrograms listed in the load value of the registry key HKEY_CURRENT_USER\\Software\\Microsoft\\Windows NT\\CurrentVersion\\Windows run automatically for the currently logged-on user.\nBy default, the multistring BootExecute value of the registry key HKEY_LOCAL_MACHINE\\System\\CurrentControlSet\\Control\\Session Manager is set to autocheck autochk *. This value causes Windows, at startup, to check the file-system integrity of the hard disks if the system has been shut down abnormally. Adversaries can add other programs or processes to this registry value which will automatically launch at boot.\nAdversaries can use these configuration locations to execute malware, such as remote access tools, to maintain persistence through system reboots. Adversaries may also use Masquerading to make the Registry entries look as if they are associated with legitimate programs.",
-              "signatures": [
+                        "techniqueID": "T1057",
+                        "color": "#e60d0d",
+                        "comment": "",
+                        "enabled": true,
+                        "metadata": [],
+                        "showSubtechniques": true
+                },
                 {
-                  "severity": "MEDIUM",
-                  "description": "Installs itself for autorun at Windows startup",
-                  "match_data": [
-                    "pid: 5336"
-                  ]
-                }
-              ]
-            },
-            {
-              "id": "T1055",
-              "name": "Process Injection",
-              "link": "https://attack.mitre.org/techniques/T1055/",
-              "description": "Adversaries may inject code into processes in order to evade process-based defenses as well as possibly elevate privileges. Process injection is a method of executing arbitrary code in the address space of a separate live process. Running code in the context of another process may allow access to the process's memory, system/network resources, and possibly elevated privileges. Execution via process injection may also evade detection from security products since the execution is masked under a legitimate process. \nThere are many different ways to inject code into a process, many of which abuse legitimate functionalities. These implementations exist for every major OS but are typically platform specific. \nMore sophisticated samples may perform multiple process injections to segment modules and further evade detection, utilizing named pipes or other inter-process communication (IPC) mechanisms as a communication channel. ",
-              "signatures": [
+                        "techniqueID": "T1003",
+                        "color": "#e60d0d",
+                        "comment": "",
+                        "enabled": true,
+                        "metadata": [],
+                        "showSubtechniques": true
+                },
                 {
-                  "severity": "LOW",
-                  "description": "Resumed a thread in another process",
-                  "match_data": [
-                    "Process xalkis sa purchase order -  317557.exe with process ID 5336 resumed a thread in another process with the process ID 5336",
-                    "pid: 5336"
-                  ]
+                        "techniqueID": "T1140",
+                        "color": "#e60d0d",
+                        "comment": "",
+                        "enabled": true,
+                        "metadata": [],
+                        "showSubtechniques": true
+                },
+                {
+                        "techniqueID": "T1562.001",
+                        "color": "#e60d0d",
+                        "comment": "",
+                        "enabled": true,
+                        "metadata": [],
+                        "showSubtechniques": true
+                },
+                {
+                        "techniqueID": "T1027.002",
+                        "color": "#e60d0d",
+                        "comment": "",
+                        "enabled": true,
+                        "metadata": [],
+                        "showSubtechniques": true
+                },
+                {
+                        "techniqueID": "T1547.001",
+                        "color": "#e60d0d",
+                        "comment": "",
+                        "enabled": true,
+                        "metadata": [],
+                        "showSubtechniques": true
+                },
+                {
+                        "techniqueID": "T1005",
+                        "color": "#e60d0d",
+                        "comment": "",
+                        "enabled": true,
+                        "metadata": [],
+                        "showSubtechniques": true
+                },
+                {
+                        "techniqueID": "T1568",
+                        "color": "#e60d0d",
+                        "comment": "",
+                        "enabled": true,
+                        "metadata": [],
+                        "showSubtechniques": true
+                },
+                {
+                        "techniqueID": "T1564",
+                        "color": "#e60d0d",
+                        "comment": "",
+                        "enabled": true,
+                        "metadata": [],
+                        "showSubtechniques": true
+                },
+                {
+                        "techniqueID": "T1547",
+                        "color": "#e60d0d",
+                        "comment": "",
+                        "enabled": true,
+                        "metadata": [],
+                        "showSubtechniques": true
+                },
+                {
+                        "techniqueID": "T1560",
+                        "color": "#e60d0d",
+                        "comment": "",
+                        "enabled": true,
+                        "metadata": [],
+                        "showSubtechniques": true
+                },
+                {
+                        "techniqueID": "T1083",
+                        "color": "#e60d0d",
+                        "comment": "",
+                        "enabled": true,
+                        "metadata": [],
+                        "showSubtechniques": true
+                },
+                {
+                        "techniqueID": "T1573",
+                        "color": "#e60d0d",
+                        "comment": "",
+                        "enabled": true,
+                        "metadata": [],
+                        "showSubtechniques": true
+                },
+                {
+                        "techniqueID": "T1016",
+                        "color": "#e60d0d",
+                        "comment": "",
+                        "enabled": true,
+                        "metadata": [],
+                        "showSubtechniques": true
+                },
+                {
+                        "techniqueID": "T1095",
+                        "color": "#e60d0d",
+                        "comment": "",
+                        "enabled": true,
+                        "metadata": [],
+                        "showSubtechniques": true
+                },
+                {
+                        "techniqueID": "T1552.001",
+                        "color": "#e60d0d",
+                        "comment": "",
+                        "enabled": true,
+                        "metadata": [],
+                        "showSubtechniques": true
+                },
+                {
+                        "techniqueID": "T1552",
+                        "color": "#e60d0d",
+                        "comment": "",
+                        "enabled": true,
+                        "metadata": [],
+                        "showSubtechniques": true
+                },
+                {
+                        "techniqueID": "T1071",
+                        "color": "#e60d0d",
+                        "comment": "",
+                        "enabled": true,
+                        "metadata": [],
+                        "showSubtechniques": true
+                },
+                {
+                        "techniqueID": "T1036",
+                        "color": "#e60d0d",
+                        "comment": "",
+                        "enabled": true,
+                        "metadata": [],
+                        "showSubtechniques": true
+                },
+                {
+                        "techniqueID": "T1027",
+                        "color": "#e60d0d",
+                        "comment": "",
+                        "enabled": true,
+                        "metadata": [],
+                        "showSubtechniques": true
+                },
+                {
+                        "techniqueID": "T1518.001",
+                        "color": "#e60d0d",
+                        "comment": "",
+                        "enabled": true,
+                        "metadata": [],
+                        "showSubtechniques": true
+                },
+                {
+                        "techniqueID": "T1112",
+                        "color": "#e60d0d",
+                        "comment": "",
+                        "enabled": true,
+                        "metadata": [],
+                        "showSubtechniques": true
+                },
+                {
+                        "techniqueID": "T1562",
+                        "color": "#e60d0d",
+                        "comment": "",
+                        "enabled": true,
+                        "metadata": [],
+                        "showSubtechniques": true
+                },
+                {
+                        "techniqueID": "T1102",
+                        "color": "#e60d0d",
+                        "comment": "",
+                        "enabled": true,
+                        "metadata": [],
+                        "showSubtechniques": true
+                },
+                {
+                        "techniqueID": "T1064",
+                        "color": "#e60d0d",
+                        "comment": "",
+                        "enabled": true,
+                        "metadata": [],
+                        "showSubtechniques": true
+                },
+                {
+                        "techniqueID": "T1497",
+                        "color": "#e60d0d",
+                        "comment": "",
+                        "enabled": true,
+                        "metadata": [],
+                        "showSubtechniques": true
+                },
+                {
+                        "techniqueID": "T1045",
+                        "color": "#e60d0d",
+                        "comment": "",
+                        "enabled": true,
+                        "metadata": [],
+                        "showSubtechniques": true
+                },
+                {
+                        "techniqueID": "T1574.002",
+                        "color": "#e60d0d",
+                        "comment": "",
+                        "enabled": true,
+                        "metadata": [],
+                        "showSubtechniques": true
+                },
+                {
+                        "techniqueID": "T1105",
+                        "color": "#e60d0d",
+                        "comment": "",
+                        "enabled": true,
+                        "metadata": [],
+                        "showSubtechniques": true
+                },
+                {
+                        "techniqueID": "T1574",
+                        "color": "#e60d0d",
+                        "comment": "",
+                        "enabled": true,
+                        "metadata": [],
+                        "showSubtechniques": true
+                },
+                {
+                        "techniqueID": "T1564.003",
+                        "color": "#e60d0d",
+                        "comment": "",
+                        "enabled": true,
+                        "metadata": [],
+                        "showSubtechniques": true
+                },
+                {
+                        "techniqueID": "T1518",
+                        "color": "#e60d0d",
+                        "comment": "",
+                        "enabled": true,
+                        "metadata": [],
+                        "showSubtechniques": true
+                },
+                {
+                        "techniqueID": "T1082",
+                        "color": "#e60d0d",
+                        "comment": "",
+                        "enabled": true,
+                        "metadata": [],
+                        "showSubtechniques": true
+                },
+                {
+                        "techniqueID": "T1106",
+                        "color": "#e60d0d",
+                        "comment": "",
+                        "enabled": true,
+                        "metadata": [],
+                        "showSubtechniques": true
+                },
+                {
+                        "techniqueID": "T1620",
+                        "color": "#e60d0d",
+                        "comment": "",
+                        "enabled": true,
+                        "metadata": [],
+                        "showSubtechniques": true
+                },
+                {
+                        "techniqueID": "T1129",
+                        "color": "#e60d0d",
+                        "comment": "",
+                        "enabled": true,
+                        "metadata": [],
+                        "showSubtechniques": true
+                },
+                {
+                        "techniqueID": "T1114",
+                        "color": "#e60d0d",
+                        "comment": "",
+                        "enabled": true,
+                        "metadata": [],
+                        "showSubtechniques": true
+                },
+                {
+                        "techniqueID": "T1055",
+                        "color": "#e60d0d",
+                        "comment": "",
+                        "enabled": true,
+                        "metadata": [],
+                        "showSubtechniques": true
                 }
-              ]
-            }
-          ]
+        ],
+        "gradient": {
+                "colors": [
+                        "#ff6666",
+                        "#ffe766",
+                        "#8ec843"
+                ],
+                "minValue": 0,
+                "maxValue": 100
         },
-        {
-          "id": "TA0005",
-          "name": "Defense Evasion",
-          "link": "https://attack.mitre.org/tactics/TA0005/",
-          "description": "The adversary is trying to avoid being detected.\n\nDefense Evasion consists of techniques that adversaries use to avoid detection throughout their compromise. Techniques used for defense evasion include uninstalling/disabling security software or obfuscating/encrypting data and scripts. Adversaries also leverage and abuse trusted processes to hide and masquerade their malware. Other tactics\u2019 techniques are cross-listed here when those techniques include the added benefit of subverting defenses. ",
-          "techniques": [
-            {
-              "id": "T1055",
-              "name": "Process Injection",
-              "link": "https://attack.mitre.org/techniques/T1055/",
-              "description": "Adversaries may inject code into processes in order to evade process-based defenses as well as possibly elevate privileges. Process injection is a method of executing arbitrary code in the address space of a separate live process. Running code in the context of another process may allow access to the process's memory, system/network resources, and possibly elevated privileges. Execution via process injection may also evade detection from security products since the execution is masked under a legitimate process. \nThere are many different ways to inject code into a process, many of which abuse legitimate functionalities. These implementations exist for every major OS but are typically platform specific. \nMore sophisticated samples may perform multiple process injections to segment modules and further evade detection, utilizing named pipes or other inter-process communication (IPC) mechanisms as a communication channel. ",
-              "signatures": [
-                {
-                  "severity": "LOW",
-                  "description": "Resumed a thread in another process",
-                  "match_data": [
-                    "Process xalkis sa purchase order -  317557.exe with process ID 5336 resumed a thread in another process with the process ID 5336",
-                    "pid: 5336"
-                  ]
-                }
-              ]
-            },
-            {
-              "id": "T1564",
-              "name": "Hide Artifacts",
-              "link": "https://attack.mitre.org/techniques/T1564/",
-              "description": "Adversaries may attempt to hide artifacts associated with their behaviors to evade detection. Operating systems may have features to hide various artifacts, such as important system files and administrative task execution, to avoid disrupting user work environments and prevent users from changing files or features on the system. Adversaries may abuse these features to hide artifacts such as files, directories, user accounts, or other system activity to evade detection.\nAdversaries may also attempt to hide artifacts associated with malicious behavior by creating computing regions that are isolated from common security instrumentation, such as through the use of virtualization technology.",
-              "signatures": [
-                {
-                  "severity": "LOW",
-                  "description": "A process created a hidden window",
-                  "match_data": [
-                    "XALKIS SA Purchase Order -  317557.exe -> C:\\Windows\\Microsoft.NET\\Framework64\\v4.0.30319\\InstallUtil.exe",
-                    "pid: 5336"
-                  ]
-                }
-              ]
-            },
-            {
-              "id": "T1112",
-              "name": "Modify Registry",
-              "link": "https://attack.mitre.org/techniques/T1112/",
-              "description": "Adversaries may interact with the Windows Registry as part of a variety of other techniques to aid in defense evasion, persistence, and execution.\nAccess to specific areas of the Registry depends on account permissions, with some keys requiring administrator-level access. The built-in Windows command-line utility Reg may be used for local or remote Registry modification. Other tools, such as remote access tools, may also contain functionality to interact with the Registry through the Windows API.\nThe Registry may be modified in order to hide configuration information or malicious payloads via Obfuscated Files or Information. The Registry may also be modified to Impair Defenses, such as by enabling macros for all Microsoft Office products, allowing privilege escalation without alerting the user, increasing the maximum number of allowed outbound requests, and/or modifying systems to store plaintext credentials in memory.\nThe Registry of a remote system may be modified to aid in execution of files as part of lateral movement. It requires the remote Registry service to be running on the target system. Often Valid Accounts are required, along with access to the remote system's SMB/Windows Admin Shares for RPC communication.\nFinally, Registry modifications may also include actions to hide keys, such as prepending key names with a null character, which will cause an error and/or be ignored when read via Reg or other utilities using the Win32 API. Adversaries may abuse these pseudo-hidden keys to conceal payloads/commands used to maintain persistence.",
-              "signatures": [
-                {
-                  "severity": "MEDIUM",
-                  "description": "Installs itself for autorun at Windows startup",
-                  "match_data": [
-                    "pid: 5336"
-                  ]
-                }
-              ]
-            },
-            {
-              "id": "T1564.003",
-              "name": "Hidden Window",
-              "link": "https://attack.mitre.org/techniques/T1564/003/",
-              "description": "Adversaries may use hidden windows to conceal malicious activity from the plain sight of users. In some cases, windows that would typically be displayed when an application carries out an operation can be hidden. This may be utilized by system administrators to avoid disrupting user work environments when carrying out administrative tasks. \nAdversaries may abuse these functionalities to hide otherwise visible windows from users so as not to alert the user to adversary activity on the system.\nOn macOS, the configurations for how applications run are listed in property list (plist) files. One of the tags in these files can be apple.awt.UIElement, which allows for Java applications to prevent the application's icon from appearing in the Dock. A common use for this is when applications run in the system tray, but don't also want to show up in the Dock.\nSimilarly, on Windows there are a variety of features in scripting languages, such as PowerShell, Jscript, and Visual Basic to make windows hidden. One example of this is powershell.exe -WindowStyle Hidden.\nThe Windows Registry can also be edited to hide application windows from the current user. For example, by setting the WindowPosition subkey in the HKEY_CURRENT_USER\\Console\\%SystemRoot%_System32_WindowsPowerShell_v1.0_PowerShell.exe Registry key to a maximum value, PowerShell windows will open off screen and be hidden.\nIn addition, Windows supports the CreateDesktop() API that can create a hidden desktop window with its own corresponding explorer.exe process.  All applications running on the hidden desktop window, such as a hidden VNC (hVNC) session, will be invisible to other desktops windows.\nAdversaries may also leverage cmd.exe as a parent process, and then utilize a LOLBin, such as DeviceCredentialDeployment.exe, to hide windows.",
-              "signatures": [
-                {
-                  "severity": "LOW",
-                  "description": "A process created a hidden window",
-                  "match_data": [
-                    "XALKIS SA Purchase Order -  317557.exe -> C:\\Windows\\Microsoft.NET\\Framework64\\v4.0.30319\\InstallUtil.exe",
-                    "pid: 5336"
-                  ]
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "id": "TA0007",
-          "name": "Discovery",
-          "link": "https://attack.mitre.org/tactics/TA0007/",
-          "description": "The adversary is trying to figure out your environment.\n\nDiscovery consists of techniques an adversary may use to gain knowledge about the system and internal network. These techniques help adversaries observe the environment and orient themselves before deciding how to act. They also allow adversaries to explore what they can control and what\u2019s around their entry point in order to discover how it could benefit their current objective. Native operating system tools are often used toward this post-compromise information-gathering objective. ",
-          "techniques": [
-            {
-              "id": "T1082",
-              "name": "System Information Discovery",
-              "link": "https://attack.mitre.org/techniques/T1082/",
-              "description": "An adversary may attempt to get detailed information about the operating system and hardware, including version, patches, hotfixes, service packs, and architecture. Adversaries may use this information to shape follow-on behaviors, including whether or not the adversary fully infects the target and/or attempts specific actions. This behavior is distinct from Local Storage Discovery which is an adversary's discovery of local drive, disks and/or volumes.\nTools such as Systeminfo can be used to gather detailed system information. If running with privileged access, a breakdown of system data can be gathered through the systemsetup configuration tool on macOS. Adversaries may leverage a Network Device CLI on network devices to gather detailed system information (e.g. show version). On ESXi servers, threat actors may gather system information from various esxcli utilities, such as system hostname get and system version get.\nInfrastructure as a Service (IaaS) cloud providers such as AWS, GCP, and Azure allow access to instance and virtual machine information via APIs. Successful authenticated API calls can return data such as the operating system platform and status of a particular instance or the model view of a virtual machine.\nSystem Information Discovery combined with information gathered from other forms of discovery and reconnaissance can drive payload development and concealment. ",
-              "signatures": [
-                {
-                  "severity": "INFO",
-                  "description": "Checks available memory",
-                  "match_data": [
-                    "pid: 5336",
-                    "pid: 1156"
-                  ]
-                }
-              ]
-            },
-            {
-              "id": "T1083",
-              "name": "File and Directory Discovery",
-              "link": "https://attack.mitre.org/techniques/T1083/",
-              "description": "Adversaries may enumerate files and directories or may search in specific locations of a host or network share for certain information within a file system. Adversaries may use the information from File and Directory Discovery during automated discovery to shape follow-on behaviors, including whether or not the adversary fully infects the target and/or attempts specific actions.\nMany command shell utilities can be used to obtain this information. Examples include dir, tree, ls, find, and locate. Custom tools may also be used to gather file and directory information and interact with the Native API. Adversaries may also leverage a Network Device CLI on network devices to gather file and directory information (e.g. dir, show flash, and/or nvram).\nSome files and directories may require elevated or specific user permissions to access.",
-              "signatures": [
-                {
-                  "severity": "MEDIUM",
-                  "description": "Attempts to identify installed AV products by installation directory",
-                  "match_data": [
-                    "C:\\Users\\Bruno\\AppData\\Local\\AVAST Software\\Browser\\User Data\\Default\\Login Data"
-                  ]
-                }
-              ]
-            },
-            {
-              "id": "T1518",
-              "name": "Software Discovery",
-              "link": "https://attack.mitre.org/techniques/T1518/",
-              "description": "Adversaries may attempt to get a listing of software and software versions that are installed on a system or in a cloud environment. Adversaries may use the information from Software Discovery during automated discovery to shape follow-on behaviors, including whether or not the adversary fully infects the target and/or attempts specific actions.\nSuch software may be deployed widely across the environment for configuration management or security reasons, such as Software Deployment Tools, and may allow adversaries broad access to infect devices or move laterally.\nAdversaries may attempt to enumerate software for a variety of reasons, such as figuring out what security measures are present or if the compromised system has a version of software that is vulnerable to Exploitation for Privilege Escalation.",
-              "signatures": [
-                {
-                  "severity": "MEDIUM",
-                  "description": "Attempts to identify installed AV products by installation directory",
-                  "match_data": [
-                    "C:\\Users\\Bruno\\AppData\\Local\\AVAST Software\\Browser\\User Data\\Default\\Login Data"
-                  ]
-                }
-              ]
-            },
-            {
-              "id": "T1518.001",
-              "name": "Security Software Discovery",
-              "link": "https://attack.mitre.org/techniques/T1518/001/",
-              "description": "Adversaries may attempt to get a listing of security software, configurations, defensive tools, and sensors that are installed on a system or in a cloud environment. This may include things such as cloud monitoring agents and anti-virus. Adversaries may use the information from Security Software Discovery during automated discovery to shape follow-on behaviors, including whether or not the adversary fully infects the target and/or attempts specific actions.\nExample commands that can be used to obtain security software information are netsh, reg query with Reg, dir with cmd, and Tasklist, but other indicators of discovery behavior may be more specific to the type of software or security system the adversary is looking for. It is becoming more common to see macOS malware perform checks for LittleSnitch and KnockKnock software.\nAdversaries may also utilize the Cloud API to discover cloud-native security software installed on compute infrastructure, such as the AWS CloudWatch agent, Azure VM Agent, and Google Cloud Monitor agent. These agents  may collect  metrics and logs from the VM, which may be centrally aggregated in a cloud-based monitoring platform.",
-              "signatures": [
-                {
-                  "severity": "MEDIUM",
-                  "description": "Attempts to identify installed AV products by installation directory",
-                  "match_data": [
-                    "C:\\Users\\Bruno\\AppData\\Local\\AVAST Software\\Browser\\User Data\\Default\\Login Data"
-                  ]
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "id": "TA0011",
-          "name": "Command and Control",
-          "link": "https://attack.mitre.org/tactics/TA0011/",
-          "description": "The adversary is trying to communicate with compromised systems to control them.\n\nCommand and Control consists of techniques that adversaries may use to communicate with systems under their control within a victim network. Adversaries commonly attempt to mimic normal, expected traffic to avoid detection. There are many ways an adversary can establish command and control with various levels of stealth depending on the victim\u2019s network structure and defenses.",
-          "techniques": [
-            {
-              "id": "T1071",
-              "name": "Application Layer Protocol",
-              "link": "https://attack.mitre.org/techniques/T1071/",
-              "description": "Adversaries may communicate using OSI application layer protocols to avoid detection/network filtering by blending in with existing traffic. Commands to the remote system, and often the results of those commands, will be embedded within the protocol traffic between the client and server. \nAdversaries may utilize many different protocols, including those used for web browsing, transferring files, electronic mail, DNS, or publishing/subscribing. For connections that occur internally within an enclave (such as those between a proxy or pivot node and other nodes), commonly used protocols are SMB, SSH, or RDP. ",
-              "signatures": [
-                {
-                  "severity": "LOW",
-                  "description": "A process attempted to delay the analysis task.",
-                  "match_data": [
-                    "pid: 1156"
-                  ]
-                },
-                {
-                  "severity": "LOW",
-                  "description": "At least one IP Address, Domain, or File Name was found in a crypto call",
-                  "match_data": [
-                    "pid: 5336",
-                    "pid: 1156"
-                  ]
-                },
-                {
-                  "severity": "LOW",
-                  "description": "Performs some HTTP requests",
-                  "match_data": [
-                    "http://ocsp.digicert.com/MFEwTzBNMEswSTAJBgUrDgMCGgUABBQ50otx%2Fh0Ztl%2Bz8SiPI7wEWVxDlQQUTiJUIBiV5uNu5g%2F6%2BrkS7QYXjzkCEApDqVCbATUviZV57HIIulA%3D",
-                    "http://196.251.92.12/Chnhsr.wav",
-                    "http://x1.c.lencr.org/",
-                    "http://checkip.dyndns.org/"
-                  ]
-                },
-                {
-                  "severity": "LOW",
-                  "description": "Reads from the memory of another process",
-                  "match_data": [
-                    "Process xalkis sa purchase order -  317557.exe with process ID 5336 read from the memory of process handle 0x000004c8",
-                    "pid: 5336"
-                  ]
-                },
-                {
-                  "severity": "LOW",
-                  "description": "Looks up the external IP address",
-                  "match_data": [
-                    "checkip.dyndns.org",
-                    "reallyfreegeoip.org"
-                  ]
-                },
-                {
-                  "severity": "LOW",
-                  "description": "HTTP traffic contains suspicious features which may be indicative of malware related traffic",
-                  "match_data": [
-                    "HTTP connection was made to an IP address rather than domain name",
-                    "http://196.251.92.12/Chnhsr.wav",
-                    "http://x1.c.lencr.org/",
-                    "http://checkip.dyndns.org/"
-                  ]
-                },
-                {
-                  "severity": "LOW",
-                  "description": "Terminates another process",
-                  "match_data": [
-                    "pid: 5336",
-                    "XALKIS SA Purchase Order -  317557.exe"
-                  ]
-                },
-                {
-                  "severity": "MEDIUM",
-                  "description": "Anomalous binary characteristics",
-                  "match_data": [
-                    "Entrypoint of binary is located outside of any mapped sections"
-                  ]
-                },
-                {
-                  "severity": "MEDIUM",
-                  "description": "Yara detections observed in process dumps, payloads or dropped files",
-                  "match_data": [
-                    "PID 1156 triggered the Yara rule 'INDICATOR_SUSPICIOUS_EXE_TelegramChatBot' with data '['h\\x00t\\x00t\\x00p\\x00s\\x00:\\x00/\\x00/\\x00a\\x00p\\x00i\\x00.\\x00t\\x00e\\x00l\\x00e\\x00g\\x00r\\x00a\\x00m\\x00.\\x00o\\x00r\\x00g\\x00/\\x00b\\x00o\\x00t\\x00', '/\\x00s\\x00e\\x00n\\x00d\\x00M\\x00e\\x00s\\x00s\\x00a\\x00g\\x00e\\x00?\\x00c\\x00h\\x00a\\x00t\\x00_\\x00i\\x00d\\x00=\\x00', '/\\x00s\\x00e\\x00n\\x00d\\x00D\\x00o\\x00c\\x00u\\x00m\\x00e\\x00n\\x00t\\x00?\\x00c\\x00h\\x00a\\x00t\\x00_\\x00i\\x00d\\x00=\\x00', '/\\x00s\\x00e\\x00n\\x00d\\x00M\\x00e\\x00s\\x00s\\x00a\\x00g\\x00e\\x00', '/\\x00s\\x00e\\x00n\\x00d\\x00D\\x00o\\x00c\\x00u\\x00m\\x00e\\x00n\\x00t\\x00']'",
-                    "PID 5336 triggered the Yara rule 'INDICATOR_SUSPICIOUS_EXE_TelegramChatBot' with data '['h\\x00t\\x00t\\x00p\\x00s\\x00:\\x00/\\x00/\\x00a\\x00p\\x00i\\x00.\\x00t\\x00e\\x00l\\x00e\\x00g\\x00r\\x00a\\x00m\\x00.\\x00o\\x00r\\x00g\\x00/\\x00b\\x00o\\x00t\\x00', '/\\x00s\\x00e\\x00n\\x00d\\x00M\\x00e\\x00s\\x00s\\x00a\\x00g\\x00e\\x00?\\x00c\\x00h\\x00a\\x00t\\x00_\\x00i\\x00d\\x00=\\x00', '/\\x00s\\x00e\\x00n\\x00d\\x00D\\x00o\\x00c\\x00u\\x00m\\x00e\\x00n\\x00t\\x00?\\x00c\\x00h\\x00a\\x00t\\x00_\\x00i\\x00d\\x00=\\x00', '/\\x00s\\x00e\\x00n\\x00d\\x00M\\x00e\\x00s\\x00s\\x00a\\x00g\\x00e\\x00', '/\\x00s\\x00e\\x00n\\x00d\\x00D\\x00o\\x00c\\x00u\\x00m\\x00e\\x00n\\x00t\\x00']'"
-                  ]
-                },
-                {
-                  "severity": "LOW",
-                  "description": "Reads data out of its own binary image",
-                  "match_data": [
-                    "process: XALKIS SA Purchase Order -  317557.exe, pid: 5336, offset: 0x00000000, length: 0x0000d200"
-                  ]
-                },
-                {
-                  "severity": "MEDIUM",
-                  "description": "Makes SMTP requests, possibly sending spam or exfiltrating data.",
-                  "match_data": [
-                    "198.54.122.135 (mail.privateemail.com)"
-                  ]
-                }
-              ]
-            },
-            {
-              "id": "T1568",
-              "name": "Dynamic Resolution",
-              "link": "https://attack.mitre.org/techniques/T1568/",
-              "description": "Adversaries may dynamically establish connections to command and control infrastructure to evade common detections and remediations. This may be achieved by using malware that shares a common algorithm with the infrastructure the adversary uses to receive the malware's communications. These calculations can be used to dynamically adjust parameters such as the domain name, IP address, or port number the malware uses for command and control.\nAdversaries may use dynamic resolution for the purpose of Fallback Channels. When contact is lost with the primary command and control server malware may employ dynamic resolution as a means to reestablishing command and control.",
-              "signatures": [
-                {
-                  "severity": "LOW",
-                  "description": "Connects to a Dynamic DNS Domain",
-                  "match_data": [
-                    "checkip.dyndns.org"
-                  ]
-                }
-              ]
-            },
-            {
-              "id": "T1573",
-              "name": "Encrypted Channel",
-              "link": "https://attack.mitre.org/techniques/T1573/",
-              "description": "Adversaries may employ an encryption algorithm to conceal command and control traffic rather than relying on any inherent protections provided by a communication protocol. Despite the use of a secure algorithm, these implementations may be vulnerable to reverse engineering if secret keys are encoded and/or generated within malware samples/configuration files.",
-              "signatures": [
-                {
-                  "severity": "LOW",
-                  "description": "Establishes an encrypted HTTPS connection",
-                  "match_data": [
-                    "ET /xml/34.30.34.203 HTTP/1.1\r\nHost: reallyfreegeoip.org\r\nConnection: Keep-Alive\r\n\r\n",
-                    "pid: 1156",
-                    "ET /xml/34.30.34.203 HTTP/1.1\r\nHost: reallyfreegeoip.org\r\n\r\n"
-                  ]
-                },
-                {
-                  "severity": "LOW",
-                  "description": "Encrypted SMTPS communication was detected",
-                  "match_data": [
-                    "{\"smtp_header\": \"AUTH login aW5mb0BmYXJlYXouc2EuY29t\\r\\n\"}",
-                    "pid: 1156",
-                    "{\"smtp_header\": \"MAIL FROM:<info@fareaz.sa.com>\\r\\n\"}",
-                    "{\"smtp_header\": \"RCPT TO:<williz.he@gmail.com>\\r\\n\"}"
-                  ]
-                },
-                {
-                  "severity": "MEDIUM",
-                  "description": "Establishes an encrypted HTTPS connection to a social media API",
-                  "match_data": [
-                    "GET /bot/sendMessage?chat_id=&text=%20%0D%0A%0D%0APC%20Name:DESKTOP-ET51AJO%0D%0ADate%20and%20Time:%207/8/2025%20/%208:23:59%20AM%0D%0ACountry%20Name:%20United%20States%0D%0A%5B%20DESKTOP-ET51AJO%20Clicked%20on%20the%20File%20If%20you%20see%20nothing%20this's%20mean%20the%20system%20storage's%20empty.%20%5D HTTP/1.1\r\nHost: api.telegram.org\r\nConnection: Keep-Alive\r\n\r\n",
-                    "pid: 1156"
-                  ]
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "id": "TA0002",
-          "name": "Execution",
-          "link": "https://attack.mitre.org/tactics/TA0002/",
-          "description": "The adversary is trying to run malicious code.\n\nExecution consists of techniques that result in adversary-controlled code running on a local or remote system. Techniques that run malicious code are often paired with techniques from all other tactics to achieve broader goals, like exploring a network or stealing data. For example, an adversary might use a remote access tool to run a PowerShell script that does Remote System Discovery. ",
-          "techniques": [
-            {
-              "id": "T1106",
-              "name": "Native API",
-              "link": "https://attack.mitre.org/techniques/T1106/",
-              "description": "Adversaries may interact with the native OS application programming interface (API) to execute behaviors. Native APIs provide a controlled means of calling low-level OS services within the kernel, such as those involving hardware/devices, memory, and processes. These native APIs are leveraged by the OS during system boot (when other system components are not yet initialized) as well as carrying out tasks and requests during routine operations.\nAdversaries may abuse these OS API functions as a means of executing behaviors. Similar to Command and Scripting Interpreter, the native API and its hierarchy of interfaces provide mechanisms to interact with and utilize various components of a victimized system.\nNative API functions (such as NtCreateProcess) may be directed invoked via system calls / syscalls, but these features are also often exposed to user-mode applications via interfaces and libraries. For example, functions such as the Windows API CreateProcess() or GNU fork() will allow programs and scripts to start other processes. This may allow API callers to execute a binary, run a CLI command, load modules, etc. as thousands of similar API functions exist for various system operations.\nHigher level software frameworks, such as Microsoft .NET and macOS Cocoa, are also available to interact with native APIs. These frameworks typically provide language wrappers/abstractions to API functionalities and are designed for ease-of-use/portability of code.\nAdversaries may use assembly to directly or in-directly invoke syscalls in an attempt to subvert defensive sensors and detection signatures such as user mode API-hooks. Adversaries may also attempt to tamper with sensors and defensive tools associated with API monitoring, such as unhooking monitored functions via Disable or Modify Tools.",
-              "signatures": [
-                {
-                  "severity": "LOW",
-                  "description": "Guard pages use detected - possible anti-debugging.",
-                  "match_data": [
-                    "pid: 5336"
-                  ]
-                }
-              ]
-            }
-          ]
-        }
-      ]
-    },
-    "Yomi Hunter": {
-      "tactics": [
-        {
-          "id": "TA0002",
-          "name": "Execution",
-          "link": "https://attack.mitre.org/tactics/TA0002/",
-          "description": "The adversary is trying to run malicious code.\n\nExecution consists of techniques that result in adversary-controlled code running on a local or remote system. Techniques that run malicious code are often paired with techniques from all other tactics to achieve broader goals, like exploring a network or stealing data. For example, an adversary might use a remote access tool to run a PowerShell script that does Remote System Discovery. ",
-          "techniques": [
-            {
-              "id": "T1129",
-              "name": "Shared Modules",
-              "link": "https://attack.mitre.org/techniques/T1129/",
-              "description": "Adversaries may execute malicious payloads via loading shared modules. Shared modules are executable files that are loaded into processes to provide access to reusable code, such as specific custom functions or invoking OS API functions (i.e., Native API).\nAdversaries may use this functionality as a way to execute arbitrary payloads on a victim system. For example, adversaries can modularize functionality of their malware into shared objects that perform various functions such as managing C2 network communications or execution of specific actions on objective.\nThe Linux & macOS module loader can load and execute shared objects from arbitrary local paths. This functionality resides in dlfcn.h in functions such as dlopen and dlsym. Although macOS can execute .so files, common practice uses .dylib files.\nThe Windows module loader can be instructed to load DLLs from arbitrary local paths and arbitrary Universal Naming Convention (UNC) network paths. This functionality resides in NTDLL.dll and is part of the Windows Native API which is called from functions like LoadLibrary at run time.",
-              "signatures": [
-                {
-                  "severity": "UNKNOWN",
-                  "description": "The process attempted to dynamically load a malicious function"
-                },
-                {
-                  "severity": "UNKNOWN",
-                  "description": "The process tried to load dynamically one or more functions."
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "id": "TA0007",
-          "name": "Discovery",
-          "link": "https://attack.mitre.org/tactics/TA0007/",
-          "description": "The adversary is trying to figure out your environment.\n\nDiscovery consists of techniques an adversary may use to gain knowledge about the system and internal network. These techniques help adversaries observe the environment and orient themselves before deciding how to act. They also allow adversaries to explore what they can control and what\u2019s around their entry point in order to discover how it could benefit their current objective. Native operating system tools are often used toward this post-compromise information-gathering objective. ",
-          "techniques": [
-            {
-              "id": "T1057",
-              "name": "Process Discovery",
-              "link": "https://attack.mitre.org/techniques/T1057/",
-              "description": "Adversaries may attempt to get information about running processes on a system. Information obtained could be used to gain an understanding of common software/applications running on systems within the network. Administrator or otherwise elevated access may provide better process details. Adversaries may use the information from Process Discovery during automated discovery to shape follow-on behaviors, including whether or not the adversary fully infects the target and/or attempts specific actions.\nIn Windows environments, adversaries could obtain details on running processes using the Tasklist utility via cmd or Get-Process via PowerShell. Information about processes can also be extracted from the output of Native API calls such as CreateToolhelp32Snapshot. In Mac and Linux, this is accomplished with the ps command. Adversaries may also opt to enumerate processes via /proc. ESXi also supports use of the ps command, as well as esxcli system process list.\nOn network devices, Network Device CLI commands such as show processes can be used to display current running processes.",
-              "signatures": [
-                {
-                  "severity": "UNKNOWN",
-                  "description": "The process has tried to detect the debugger probing the use of page guards."
-                },
-                {
-                  "severity": "UNKNOWN",
-                  "description": "The process attempted to detect a running debugger using common APIs"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "id": "TA0005",
-          "name": "Defense Evasion",
-          "link": "https://attack.mitre.org/tactics/TA0005/",
-          "description": "The adversary is trying to avoid being detected.\n\nDefense Evasion consists of techniques that adversaries use to avoid detection throughout their compromise. Techniques used for defense evasion include uninstalling/disabling security software or obfuscating/encrypting data and scripts. Adversaries also leverage and abuse trusted processes to hide and masquerade their malware. Other tactics\u2019 techniques are cross-listed here when those techniques include the added benefit of subverting defenses. ",
-          "techniques": [
-            {
-              "id": "T1045",
-              "name": "Software Packing",
-              "link": "https://attack.mitre.org/techniques/T1045/",
-              "description": "Software packing is a method of compressing or encrypting an executable. Packing an executable changes the file signature in an attempt to avoid signature-based detection. Most decompression techniques decompress the executable code in memory.\nUtilities used to perform software packing are called packers. Example packers are MPRESS and UPX. A more comprehensive list of known packers is available,  but adversaries may create their own packing techniques that do not leave the same artifacts as well-known packers to evade defenses.\nAdversaries may use virtual machine software protection as a form of software packing to protect their code. Virtual machine software protection translates an executable's original code into a special format that only a special virtual machine can run. A virtual machine is then called to run this code.",
-              "signatures": [
-                {
-                  "severity": "UNKNOWN",
-                  "description": "Manalize Local SandBox Packer Harvesting"
-                }
-              ]
-            },
-            {
-              "id": "T1620",
-              "name": "Reflective Code Loading",
-              "link": "https://attack.mitre.org/techniques/T1620/",
-              "description": "Adversaries may reflectively load code into a process in order to conceal the execution of malicious payloads. Reflective loading involves allocating then executing payloads directly within the memory of the process, vice creating a thread or process backed by a file path on disk (e.g., Shared Modules).\nReflectively loaded payloads may be compiled binaries, anonymous files (only present in RAM), or just snubs of fileless executable code (ex: position-independent shellcode). For example, the Assembly.Load() method executed by PowerShell may be abused to load raw code into the running process.\nReflective code injection is very similar to Process Injection except that the \u201cinjection\u201d loads code into the processes\u2019 own memory instead of that of a separate process. Reflective loading may evade process-based detections since the execution of the arbitrary code may be masked within a legitimate or otherwise benign process. Reflectively loading payloads directly into memory may also avoid creating files or other artifacts on disk, while also enabling malware to keep these payloads encrypted (or otherwise obfuscated) until execution.",
-              "signatures": [
-                {
-                  "severity": "UNKNOWN",
-                  "description": "load .NET assembly"
-                }
-              ]
-            },
-            {
-              "id": "T1140",
-              "name": "Deobfuscate/Decode Files or Information",
-              "link": "https://attack.mitre.org/techniques/T1140/",
-              "description": "Adversaries may use Obfuscated Files or Information to hide artifacts of an intrusion from analysis. They may require separate mechanisms to decode or deobfuscate that information depending on how they intend to use it. Methods for doing that include built-in functionality of malware or by using utilities present on the system.\nOne such example is the use of certutil to decode a remote access tool portable executable file that has been hidden inside a certificate file. Another example is using the Windows copy /b or type command to reassemble binary fragments into a malicious payload.\nSometimes a user's action may be required to open it for deobfuscation or decryption as part of User Execution. The user may also be required to input a password to open a password protected compressed/encrypted file that was provided by the adversary.",
-              "signatures": [
-                {
-                  "severity": "UNKNOWN",
-                  "description": "decode data using Base64 in .NET"
-                }
-              ]
-            }
-          ]
-        }
-      ]
-    },
-    "Zenbox": {
-      "tactics": [
-        {
-          "id": "TA0002",
-          "name": "Execution",
-          "link": "https://attack.mitre.org/tactics/TA0002/",
-          "description": "The adversary is trying to run malicious code.\n\nExecution consists of techniques that result in adversary-controlled code running on a local or remote system. Techniques that run malicious code are often paired with techniques from all other tactics to achieve broader goals, like exploring a network or stealing data. For example, an adversary might use a remote access tool to run a PowerShell script that does Remote System Discovery. ",
-          "techniques": [
-            {
-              "id": "T1064",
-              "name": "Scripting",
-              "link": "https://attack.mitre.org/techniques/T1064/",
-              "description": "This technique has been deprecated. Please use Command and Scripting Interpreter where appropriate.\nAdversaries may use scripts to aid in operations and perform multiple actions that would otherwise be manual. Scripting is useful for speeding up operational tasks and reducing the time required to gain access to critical resources. Some scripting languages may be used to bypass process monitoring mechanisms by directly interacting with the operating system at an API level instead of calling other programs. Common scripting languages for Windows include VBScript and PowerShell but could also be in the form of command-line batch scripts.\nScripts can be embedded inside Office documents as macros that can be set to execute when files used in Spearphishing Attachment and other types of spearphishing are opened. Malicious embedded macros are an alternative means of execution than software exploitation through Exploitation for Client Execution, where adversaries will rely on macros being allowed or that the user will accept to activate them.\nMany popular offensive frameworks exist which use forms of scripting for security testers and adversaries alike. Metasploit , Veil , and PowerSploit  are three examples that are popular among penetration testers for exploit and post-compromise operations and include many features for evading defenses. Some adversaries are known to use PowerShell. ",
-              "signatures": [
-                {
-                  "severity": "LOW",
-                  "description": "Drops VBS files to the startup folder (C:\\\\Documents and Settings\\\\All Users\\\\Start Menu\\\\Programs\\\\Startup)",
-                  "match_data": [
-                    "C:\\Users\\user\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\RenewOnCallTime.vbs"
-                  ]
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "id": "TA0005",
-          "name": "Defense Evasion",
-          "link": "https://attack.mitre.org/tactics/TA0005/",
-          "description": "The adversary is trying to avoid being detected.\n\nDefense Evasion consists of techniques that adversaries use to avoid detection throughout their compromise. Techniques used for defense evasion include uninstalling/disabling security software or obfuscating/encrypting data and scripts. Adversaries also leverage and abuse trusted processes to hide and masquerade their malware. Other tactics\u2019 techniques are cross-listed here when those techniques include the added benefit of subverting defenses. ",
-          "techniques": [
-            {
-              "id": "T1064",
-              "name": "Scripting",
-              "link": "https://attack.mitre.org/techniques/T1064/",
-              "description": "This technique has been deprecated. Please use Command and Scripting Interpreter where appropriate.\nAdversaries may use scripts to aid in operations and perform multiple actions that would otherwise be manual. Scripting is useful for speeding up operational tasks and reducing the time required to gain access to critical resources. Some scripting languages may be used to bypass process monitoring mechanisms by directly interacting with the operating system at an API level instead of calling other programs. Common scripting languages for Windows include VBScript and PowerShell but could also be in the form of command-line batch scripts.\nScripts can be embedded inside Office documents as macros that can be set to execute when files used in Spearphishing Attachment and other types of spearphishing are opened. Malicious embedded macros are an alternative means of execution than software exploitation through Exploitation for Client Execution, where adversaries will rely on macros being allowed or that the user will accept to activate them.\nMany popular offensive frameworks exist which use forms of scripting for security testers and adversaries alike. Metasploit , Veil , and PowerSploit  are three examples that are popular among penetration testers for exploit and post-compromise operations and include many features for evading defenses. Some adversaries are known to use PowerShell. ",
-              "signatures": [
-                {
-                  "severity": "LOW",
-                  "description": "Drops VBS files to the startup folder (C:\\\\Documents and Settings\\\\All Users\\\\Start Menu\\\\Programs\\\\Startup)",
-                  "match_data": [
-                    "C:\\Users\\user\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\RenewOnCallTime.vbs"
-                  ]
-                }
-              ]
-            },
-            {
-              "id": "T1574",
-              "name": "Hijack Execution Flow",
-              "link": "https://attack.mitre.org/techniques/T1574/",
-              "description": "Adversaries may execute their own malicious payloads by hijacking the way operating systems run programs. Hijacking execution flow can be for the purposes of persistence, since this hijacked execution may reoccur over time. Adversaries may also use these mechanisms to elevate privileges or evade defenses, such as application control or other restrictions on execution.\nThere are many ways an adversary may hijack the flow of execution, including by manipulating how the operating system locates programs to be executed. How the operating system locates libraries to be used by a program can also be intercepted. Locations where the operating system looks for programs/resources, such as file directories and in the case of Windows the Registry, could also be poisoned to include malicious payloads."
-            },
-            {
-              "id": "T1574.002",
-              "name": "DLL Side-Loading",
-              "link": "https://attack.mitre.org/techniques/T1574/002/",
-              "description": "Adversaries may execute their own malicious payloads by side-loading DLLs. Similar to DLL, side-loading involves hijacking which DLL a program loads. But rather than just planting the DLL within the search order of a program then waiting for the victim application to be invoked, adversaries may directly side-load their payloads by planting then invoking a legitimate application that executes their payload(s).\nSide-loading takes advantage of the DLL search order used by the loader by positioning both the victim application and malicious payload(s) alongside each other. Adversaries likely use side-loading as a means of masking actions they perform under a legitimate, trusted, and potentially elevated system or software process. Benign executables used to side-load payloads may not be flagged during delivery and/or execution. Adversary payloads may also be encrypted/packed or otherwise obfuscated until loaded into the memory of the trusted process.",
-              "signatures": [
-                {
-                  "severity": "INFO",
-                  "description": "Tries to load missing DLLs",
-                  "match_data": [
-                    "mscoree.dll",
-                    "apphelp.dll",
-                    "kernel.appcore.dll",
-                    "version.dll",
-                    "vcruntime140_1_clr0400.dll",
-                    "vcruntime140_clr0400.dll",
-                    "ucrtbase_clr0400.dll",
-                    "uxtheme.dll",
-                    "windows.storage.dll",
-                    "wintypes.dll",
-                    "profapi.dll",
-                    "bcrypt.dll",
-                    "cryptsp.dll",
-                    "rsaenh.dll",
-                    "cryptbase.dll",
-                    "wldp.dll",
-                    "amsi.dll",
-                    "userenv.dll",
-                    "msasn1.dll",
-                    "gpapi.dll",
-                    "dwrite.dll",
-                    "rasapi32.dll",
-                    "rtutils.dll",
-                    "rasman.dll",
-                    "mswsock.dll",
-                    "winhttp.dll",
-                    "ondemandconnroutehelper.dll",
-                    "iphlpapi.dll",
-                    "dhcpcsvc6.dll",
-                    "dhcpcsvc.dll",
-                    "dnsapi.dll",
-                    "ntmarta.dll",
-                    "winnsi.dll",
-                    "rasadhlp.dll",
-                    "fwpuclnt.dll",
-                    "secur32.dll",
-                    "sspicli.dll",
-                    "schannel.dll",
-                    "ncrypt.dll",
-                    "ntasn1.dll",
-                    "ncryptsslp.dll"
-                  ]
-                }
-              ]
-            },
-            {
-              "id": "T1055",
-              "name": "Process Injection",
-              "link": "https://attack.mitre.org/techniques/T1055/",
-              "description": "Adversaries may inject code into processes in order to evade process-based defenses as well as possibly elevate privileges. Process injection is a method of executing arbitrary code in the address space of a separate live process. Running code in the context of another process may allow access to the process's memory, system/network resources, and possibly elevated privileges. Execution via process injection may also evade detection from security products since the execution is masked under a legitimate process. \nThere are many different ways to inject code into a process, many of which abuse legitimate functionalities. These implementations exist for every major OS but are typically platform specific. \nMore sophisticated samples may perform multiple process injections to segment modules and further evade detection, utilizing named pipes or other inter-process communication (IPC) mechanisms as a communication channel. ",
-              "signatures": [
-                {
-                  "severity": "LOW",
-                  "description": "Injects a PE file into a foreign processes",
-                  "match_data": [
-                    "C:\\Windows\\Microsoft.NET\\Framework64\\v4.0.30319\\InstallUtil.exe base: 140000000 value starts with: 4D5A"
-                  ]
-                },
-                {
-                  "severity": "LOW",
-                  "description": "Writes to foreign memory regions",
-                  "match_data": [
-                    "C:\\Windows\\Microsoft.NET\\Framework64\\v4.0.30319\\InstallUtil.exe base: 140000000",
-                    "C:\\Windows\\Microsoft.NET\\Framework64\\v4.0.30319\\InstallUtil.exe base: 140002000",
-                    "C:\\Windows\\Microsoft.NET\\Framework64\\v4.0.30319\\InstallUtil.exe base: 140046000",
-                    "C:\\Windows\\Microsoft.NET\\Framework64\\v4.0.30319\\InstallUtil.exe base: 5FF0D9C010"
-                  ]
-                },
-                {
-                  "severity": "LOW",
-                  "description": "Modifies the context of a thread in another process (thread injection)",
-                  "match_data": [
-                    "target process: 1220"
-                  ]
-                }
-              ]
-            },
-            {
-              "id": "T1036",
-              "name": "Masquerading",
-              "link": "https://attack.mitre.org/techniques/T1036/",
-              "description": "Adversaries may attempt to manipulate features of their artifacts to make them appear legitimate or benign to users and/or security tools. Masquerading occurs when the name or location of an object, legitimate or malicious, is manipulated or abused for the sake of evading defenses and observation. This may include manipulating file metadata, tricking users into misidentifying the file type, and giving legitimate task or service names.\nRenaming abusable system utilities to evade security monitoring is also a form of Masquerading.",
-              "signatures": [
-                {
-                  "severity": "INFO",
-                  "description": "Creates files inside the user directory",
-                  "match_data": [
-                    "C:\\Users\\user\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\RenewOnCallTime.vbs"
-                  ]
-                }
-              ]
-            },
-            {
-              "id": "T1562",
-              "name": "Impair Defenses",
-              "link": "https://attack.mitre.org/techniques/T1562/",
-              "description": "Adversaries may maliciously modify components of a victim environment in order to hinder or disable defensive mechanisms. This not only involves impairing preventative defenses, such as firewalls and anti-virus, but also detection capabilities that defenders can use to audit activity and identify malicious behavior. This may also span both native defenses as well as supplemental capabilities installed by users and administrators.\nAdversaries may also impair routine operations that contribute to defensive hygiene, such as blocking users from logging out, preventing a system from shutting down, or disabling or modifying the update process. Adversaries could also target event aggregation and analysis mechanisms, or otherwise disrupt these procedures by altering other system components. These restrictions can further enable malicious operations as well as the continued propagation of incidents."
-            },
-            {
-              "id": "T1562.001",
-              "name": "Disable or Modify Tools",
-              "link": "https://attack.mitre.org/techniques/T1562/001/",
-              "description": "Adversaries may modify and/or disable security tools to avoid possible detection of their malware/tools and activities. This may take many forms, such as killing security software processes or services, modifying / deleting Registry keys or configuration files so that tools do not operate properly, or other methods to interfere with security tools scanning or reporting information. Adversaries may also disable updates to prevent the latest security patches from reaching tools on victim systems.\nAdversaries may trigger a denial-of-service attack via legitimate system processes. It has been previously observed that the Windows Time Travel Debugging (TTD) monitor driver can be used to initiate a debugging session for a security tool (e.g., an EDR) and render the tool non-functional.  By hooking the debugger into the EDR process, all child processes from the EDR will be automatically suspended. The attacker can terminate any EDR helper processes (unprotected by Windows Protected Process Light) by abusing the Process Explorer driver. In combination this will halt any attempt to restart services and cause the tool to crash.\nAdversaries may also tamper with artifacts deployed and utilized by security tools. Security tools may make dynamic changes to system components in order to maintain visibility into specific events. For example, security products may load their own modules and/or modify those loaded by processes to facilitate data collection. Similar to Indicator Blocking, adversaries may unhook or otherwise modify these features added by tools (especially those that exist in userland or are otherwise potentially accessible to adversaries) to avoid detection. For example, adversaries may abuse the Windows process mitigation policy to block certain endpoint detection and response (EDR) products from loading their user-mode code via DLLs. By spawning a process with the PROCESS_CREATION_MITIGATION_POLICY_BLOCK_NON_MICROSOFT_BINARIES_ALWAYS_ON attribute using API calls like UpdateProcThreadAttribute, adversaries may evade detection by endpoint security solutions that rely on DLLs that are not signed by Microsoft. Alternatively, they may add new directories to an EDR tool\u2019s exclusion list, enabling them to hide malicious files via File/Path Exclusions.\nAdversaries may also focus on specific applications such as Sysmon. For example, the \u201cStart\u201d and \u201cEnable\u201d values in HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\WMI\\Autologger\\EventLog-Microsoft-Windows-Sysmon-Operational may be modified to tamper with and potentially disable Sysmon logging. \nOn network devices, adversaries may attempt to skip digital signature verification checks by altering startup configuration files and effectively disabling firmware verification that typically occurs at boot.\nIn cloud environments, tools disabled by adversaries may include cloud monitoring agents that report back to services such as AWS CloudWatch or Google Cloud Monitor.\nFurthermore, although defensive tools may have anti-tampering mechanisms, adversaries may abuse tools such as legitimate rootkit removal kits to impair and/or disable these tools. For example, adversaries have used tools such as GMER to find and shut down hidden processes and antivirus software on infected systems.\nAdditionally, adversaries may exploit legitimate drivers from anti-virus software to gain access to kernel space (i.e. Exploitation for Privilege Escalation), which may lead to bypassing anti-tampering features.",
-              "signatures": [
-                {
-                  "severity": "INFO",
-                  "description": "Creates guard pages, often used to prevent reverse engineering and debugging",
-                  "match_data": [
-                    "page read and write | page guard"
-                  ]
-                }
-              ]
-            },
-            {
-              "id": "T1497",
-              "name": "Virtualization/Sandbox Evasion",
-              "link": "https://attack.mitre.org/techniques/T1497/",
-              "description": "Adversaries may employ various means to detect and avoid virtualization and analysis environments. This may include changing behaviors based on the results of checks for the presence of artifacts indicative of a virtual machine environment (VME) or sandbox. If the adversary detects a VME, they may alter their malware to disengage from the victim or conceal the core functions of the implant. They may also search for VME artifacts before dropping secondary or additional payloads. Adversaries may use the information learned from Virtualization/Sandbox Evasion during automated discovery to shape follow-on behaviors.\nAdversaries may use several methods to accomplish Virtualization/Sandbox Evasion such as checking for security monitoring tools (e.g., Sysinternals, Wireshark, etc.) or other system artifacts associated with analysis or virtualization. Adversaries may also check for legitimate user activity to help determine if it is in an analysis environment. Additional methods include use of sleep timers or loops within malware code to avoid operating within a temporary sandbox.",
-              "signatures": [
-                {
-                  "severity": "INFO",
-                  "description": "Contains medium sleeps (>= 30s)",
-                  "match_data": [
-                    "delay time: 922337203685477",
-                    "delay time: 600000",
-                    "delay time: 599485",
-                    "delay time: 599194",
-                    "delay time: 599076",
-                    "delay time: 598935",
-                    "delay time: 598819",
-                    "delay time: 597169",
-                    "delay time: 596085"
-                  ]
-                },
-                {
-                  "severity": "INFO",
-                  "description": "Contains long sleeps (>= 3 min)",
-                  "match_data": [
-                    "delay time: 922337203685477",
-                    "delay time: 600000",
-                    "delay time: 599485",
-                    "delay time: 599194",
-                    "delay time: 599076",
-                    "delay time: 598935",
-                    "delay time: 598819",
-                    "delay time: 597169",
-                    "delay time: 596085"
-                  ]
-                },
-                {
-                  "severity": "INFO",
-                  "description": "May sleep (evasive loops) to hinder dynamic analysis",
-                  "match_data": [
-                    "-1844674407370954s >= -30000s",
-                    "-600000s >= -30000s",
-                    "-599485s >= -30000s",
-                    "-599194s >= -30000s",
-                    "-599076s >= -30000s",
-                    "-598935s >= -30000s",
-                    "-598819s >= -30000s",
-                    "-597169s >= -30000s",
-                    "-596085s >= -30000s",
-                    "-922337203685477s >= -30000s"
-                  ]
-                },
-                {
-                  "severity": "INFO",
-                  "description": "Allocates memory with a write watch (potentially for evading sandboxes)",
-                  "match_data": [
-                    "204A3950000 memory reserve | memory write watch",
-                    "204BD3A0000 memory reserve | memory write watch",
-                    "1EA32260000 memory reserve | memory write watch",
-                    "1EA4A3A0000 memory reserve | memory write watch"
-                  ]
-                }
-              ]
-            },
-            {
-              "id": "T1140",
-              "name": "Deobfuscate/Decode Files or Information",
-              "link": "https://attack.mitre.org/techniques/T1140/",
-              "description": "Adversaries may use Obfuscated Files or Information to hide artifacts of an intrusion from analysis. They may require separate mechanisms to decode or deobfuscate that information depending on how they intend to use it. Methods for doing that include built-in functionality of malware or by using utilities present on the system.\nOne such example is the use of certutil to decode a remote access tool portable executable file that has been hidden inside a certificate file. Another example is using the Windows copy /b or type command to reassemble binary fragments into a malicious payload.\nSometimes a user's action may be required to open it for deobfuscation or decryption as part of User Execution. The user may also be required to input a password to open a password protected compressed/encrypted file that was provided by the adversary.",
-              "signatures": [
-                {
-                  "severity": "INFO",
-                  "description": ".NET source code contains calls to encryption/decryption functions",
-                  "match_data": [
-                    "'CreateDecryptor'"
-                  ]
-                }
-              ]
-            },
-            {
-              "id": "T1027",
-              "name": "Obfuscated Files or Information",
-              "link": "https://attack.mitre.org/techniques/T1027/",
-              "description": "Adversaries may attempt to make an executable or file difficult to discover or analyze by encrypting, encoding, or otherwise obfuscating its contents on the system or in transit. This is common behavior that can be used across different platforms and the network to evade defenses. \nPayloads may be compressed, archived, or encrypted in order to avoid detection. These payloads may be used during Initial Access or later to mitigate detection. Sometimes a user's action may be required to open and Deobfuscate/Decode Files or Information for User Execution. The user may also be required to input a password to open a password protected compressed/encrypted file that was provided by the adversary.  Adversaries may also use compressed or archived scripts, such as JavaScript. \nPortions of files can also be encoded to hide the plain-text strings that would otherwise help defenders with discovery.  Payloads may also be split into separate, seemingly benign files that only reveal malicious functionality when reassembled. \nAdversaries may also abuse Command Obfuscation to obscure commands executed from payloads or directly via Command and Scripting Interpreter. Environment variables, aliases, characters, and other platform/language specific semantics can be used to evade signature based detections and application control mechanisms.   ",
-              "signatures": [
-                {
-                  "severity": "INFO",
-                  "description": ".NET source code contains long base64-encoded strings",
-                  "match_data": [
-                    "'zWiho0QfsEO3sU0X/WW7uE9c32KhskwQ8mjpkEQG23+mpVgz7WK3ukMe5yq1slUt2GS+u28T83TpuFEt13+3plQT8nimrhoV+2WNm0Qc+WW67GYX6kWrp0Q07H6/n0Ac+n237EYX6k6ctkwXpVi8s0QK0XfphUQT+kKmpUgc+SqTs0VJ+XSmiHEd7Ximvk4cpXa3o34"
-                  ]
-                }
-              ]
-            },
-            {
-              "id": "T1027.002",
-              "name": "Software Packing",
-              "link": "https://attack.mitre.org/techniques/T1027/002/",
-              "description": "Adversaries may perform software packing or virtual machine software protection to conceal their code. Software packing is a method of compressing or encrypting an executable. Packing an executable changes the file signature in an attempt to avoid signature-based detection. Most decompression techniques decompress the executable code in memory. Virtual machine software protection translates an executable's original code into a special format that only a special virtual machine can run. A virtual machine is then called to run this code. \nUtilities used to perform software packing are called packers. Example packers are MPRESS and UPX. A more comprehensive list of known packers is available, but adversaries may create their own packing techniques that do not leave the same artifacts as well-known packers to evade defenses.  ",
-              "signatures": [
-                {
-                  "severity": "LOW",
-                  "description": ".NET source code contains potential unpacker",
-                  "match_data": [
-                    "_E009 System.Reflection.Assembly.Load(byte[])"
-                  ]
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "id": "TA0003",
-          "name": "Persistence",
-          "link": "https://attack.mitre.org/tactics/TA0003/",
-          "description": "The adversary is trying to maintain their foothold.\n\nPersistence consists of techniques that adversaries use to keep access to systems across restarts, changed credentials, and other interruptions that could cut off their access. Techniques used for persistence include any access, action, or configuration changes that let them maintain their foothold on systems, such as replacing or hijacking legitimate code or adding startup code. ",
-          "techniques": [
-            {
-              "id": "T1547",
-              "name": "Boot or Logon Autostart Execution",
-              "link": "https://attack.mitre.org/techniques/T1547/",
-              "description": "Adversaries may configure system settings to automatically execute a program during system boot or logon to maintain persistence or gain higher-level privileges on compromised systems. Operating systems may have mechanisms for automatically running a program on system boot or account logon. These mechanisms may include automatically executing programs that are placed in specially designated directories or are referenced by repositories that store configuration information, such as the Windows Registry. An adversary may achieve the same goal by modifying or extending features of the kernel.\nSince some boot or logon autostart programs run with higher privileges, an adversary may leverage these to elevate privileges."
-            },
-            {
-              "id": "T1547.001",
-              "name": "Registry Run Keys / Startup Folder",
-              "link": "https://attack.mitre.org/techniques/T1547/001/",
-              "description": "Adversaries may achieve persistence by adding a program to a startup folder or referencing it with a Registry run key. Adding an entry to the \"run keys\" in the Registry or startup folder will cause the program referenced to be executed when a user logs in. These programs will be executed under the context of the user and will have the account's associated permissions level.\nThe following run keys are created by default on Windows systems:\n\nHKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run\nHKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\RunOnce\nHKEY_LOCAL_MACHINE\\Software\\Microsoft\\Windows\\CurrentVersion\\Run\nHKEY_LOCAL_MACHINE\\Software\\Microsoft\\Windows\\CurrentVersion\\RunOnce\n\nRun keys may exist under multiple hives. The HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Windows\\CurrentVersion\\RunOnceEx is also available but is not created by default on Windows Vista and newer. Registry run key entries can reference programs directly or list them as a dependency. For example, it is possible to load a DLL at logon using a \"Depend\" key with RunOnceEx: reg add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnceEx\\0001\\Depend /v 1 /d \"C:\\temp\\evil[.]dll\" \nPlacing a program within a startup folder will also cause that program to execute when a user logs in. There is a startup folder location for individual user accounts as well as a system-wide startup folder that will be checked regardless of which user account logs in. The startup folder path for the current user is C:\\Users\\[Username]\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup. The startup folder path for all users is C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp.\nThe following Registry keys can be used to set startup folder items for persistence:\n\nHKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\User Shell Folders\nHKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders\nHKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders\nHKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\User Shell Folders\n\nThe following Registry keys can control automatic startup of services during boot:\n\nHKEY_LOCAL_MACHINE\\Software\\Microsoft\\Windows\\CurrentVersion\\RunServicesOnce\nHKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\RunServicesOnce\nHKEY_LOCAL_MACHINE\\Software\\Microsoft\\Windows\\CurrentVersion\\RunServices\nHKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\RunServices\n\nUsing policy settings to specify startup programs creates corresponding values in either of two Registry keys:\n\nHKEY_LOCAL_MACHINE\\Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\Run\nHKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\Run\n\nPrograms listed in the load value of the registry key HKEY_CURRENT_USER\\Software\\Microsoft\\Windows NT\\CurrentVersion\\Windows run automatically for the currently logged-on user.\nBy default, the multistring BootExecute value of the registry key HKEY_LOCAL_MACHINE\\System\\CurrentControlSet\\Control\\Session Manager is set to autocheck autochk *. This value causes Windows, at startup, to check the file-system integrity of the hard disks if the system has been shut down abnormally. Adversaries can add other programs or processes to this registry value which will automatically launch at boot.\nAdversaries can use these configuration locations to execute malware, such as remote access tools, to maintain persistence through system reboots. Adversaries may also use Masquerading to make the Registry entries look as if they are associated with legitimate programs.",
-              "signatures": [
-                {
-                  "severity": "INFO",
-                  "description": "Stores files to the Windows startup directory",
-                  "match_data": [
-                    "C:\\Users\\user\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\RenewOnCallTime.vbs"
-                  ]
-                },
-                {
-                  "severity": "INFO",
-                  "description": "Creates a start menu entry (Start Menu\\\\Programs\\\\Startup)",
-                  "match_data": [
-                    "C:\\Users\\user\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\RenewOnCallTime.vbs"
-                  ]
-                }
-              ]
-            },
-            {
-              "id": "T1574",
-              "name": "Hijack Execution Flow",
-              "link": "https://attack.mitre.org/techniques/T1574/",
-              "description": "Adversaries may execute their own malicious payloads by hijacking the way operating systems run programs. Hijacking execution flow can be for the purposes of persistence, since this hijacked execution may reoccur over time. Adversaries may also use these mechanisms to elevate privileges or evade defenses, such as application control or other restrictions on execution.\nThere are many ways an adversary may hijack the flow of execution, including by manipulating how the operating system locates programs to be executed. How the operating system locates libraries to be used by a program can also be intercepted. Locations where the operating system looks for programs/resources, such as file directories and in the case of Windows the Registry, could also be poisoned to include malicious payloads."
-            },
-            {
-              "id": "T1574.002",
-              "name": "DLL Side-Loading",
-              "link": "https://attack.mitre.org/techniques/T1574/002/",
-              "description": "Adversaries may execute their own malicious payloads by side-loading DLLs. Similar to DLL, side-loading involves hijacking which DLL a program loads. But rather than just planting the DLL within the search order of a program then waiting for the victim application to be invoked, adversaries may directly side-load their payloads by planting then invoking a legitimate application that executes their payload(s).\nSide-loading takes advantage of the DLL search order used by the loader by positioning both the victim application and malicious payload(s) alongside each other. Adversaries likely use side-loading as a means of masking actions they perform under a legitimate, trusted, and potentially elevated system or software process. Benign executables used to side-load payloads may not be flagged during delivery and/or execution. Adversary payloads may also be encrypted/packed or otherwise obfuscated until loaded into the memory of the trusted process.",
-              "signatures": [
-                {
-                  "severity": "INFO",
-                  "description": "Tries to load missing DLLs",
-                  "match_data": [
-                    "mscoree.dll",
-                    "apphelp.dll",
-                    "kernel.appcore.dll",
-                    "version.dll",
-                    "vcruntime140_1_clr0400.dll",
-                    "vcruntime140_clr0400.dll",
-                    "ucrtbase_clr0400.dll",
-                    "uxtheme.dll",
-                    "windows.storage.dll",
-                    "wintypes.dll",
-                    "profapi.dll",
-                    "bcrypt.dll",
-                    "cryptsp.dll",
-                    "rsaenh.dll",
-                    "cryptbase.dll",
-                    "wldp.dll",
-                    "amsi.dll",
-                    "userenv.dll",
-                    "msasn1.dll",
-                    "gpapi.dll",
-                    "dwrite.dll",
-                    "rasapi32.dll",
-                    "rtutils.dll",
-                    "rasman.dll",
-                    "mswsock.dll",
-                    "winhttp.dll",
-                    "ondemandconnroutehelper.dll",
-                    "iphlpapi.dll",
-                    "dhcpcsvc6.dll",
-                    "dhcpcsvc.dll",
-                    "dnsapi.dll",
-                    "ntmarta.dll",
-                    "winnsi.dll",
-                    "rasadhlp.dll",
-                    "fwpuclnt.dll",
-                    "secur32.dll",
-                    "sspicli.dll",
-                    "schannel.dll",
-                    "ncrypt.dll",
-                    "ntasn1.dll",
-                    "ncryptsslp.dll"
-                  ]
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "id": "TA0004",
-          "name": "Privilege Escalation",
-          "link": "https://attack.mitre.org/tactics/TA0004/",
-          "description": "The adversary is trying to gain higher-level permissions.\n\nPrivilege Escalation consists of techniques that adversaries use to gain higher-level permissions on a system or network. Adversaries can often enter and explore a network with unprivileged access but require elevated permissions to follow through on their objectives. Common approaches are to take advantage of system weaknesses, misconfigurations, and vulnerabilities. Examples of elevated access include: \n\n* SYSTEM/root level\n* local administrator\n* user account with admin-like access \n* user accounts with access to specific system or perform specific function\n\nThese techniques often overlap with Persistence techniques, as OS features that let an adversary persist can execute in an elevated context.  ",
-          "techniques": [
-            {
-              "id": "T1547",
-              "name": "Boot or Logon Autostart Execution",
-              "link": "https://attack.mitre.org/techniques/T1547/",
-              "description": "Adversaries may configure system settings to automatically execute a program during system boot or logon to maintain persistence or gain higher-level privileges on compromised systems. Operating systems may have mechanisms for automatically running a program on system boot or account logon. These mechanisms may include automatically executing programs that are placed in specially designated directories or are referenced by repositories that store configuration information, such as the Windows Registry. An adversary may achieve the same goal by modifying or extending features of the kernel.\nSince some boot or logon autostart programs run with higher privileges, an adversary may leverage these to elevate privileges."
-            },
-            {
-              "id": "T1547.001",
-              "name": "Registry Run Keys / Startup Folder",
-              "link": "https://attack.mitre.org/techniques/T1547/001/",
-              "description": "Adversaries may achieve persistence by adding a program to a startup folder or referencing it with a Registry run key. Adding an entry to the \"run keys\" in the Registry or startup folder will cause the program referenced to be executed when a user logs in. These programs will be executed under the context of the user and will have the account's associated permissions level.\nThe following run keys are created by default on Windows systems:\n\nHKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run\nHKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\RunOnce\nHKEY_LOCAL_MACHINE\\Software\\Microsoft\\Windows\\CurrentVersion\\Run\nHKEY_LOCAL_MACHINE\\Software\\Microsoft\\Windows\\CurrentVersion\\RunOnce\n\nRun keys may exist under multiple hives. The HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Windows\\CurrentVersion\\RunOnceEx is also available but is not created by default on Windows Vista and newer. Registry run key entries can reference programs directly or list them as a dependency. For example, it is possible to load a DLL at logon using a \"Depend\" key with RunOnceEx: reg add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnceEx\\0001\\Depend /v 1 /d \"C:\\temp\\evil[.]dll\" \nPlacing a program within a startup folder will also cause that program to execute when a user logs in. There is a startup folder location for individual user accounts as well as a system-wide startup folder that will be checked regardless of which user account logs in. The startup folder path for the current user is C:\\Users\\[Username]\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup. The startup folder path for all users is C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp.\nThe following Registry keys can be used to set startup folder items for persistence:\n\nHKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\User Shell Folders\nHKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders\nHKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders\nHKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\User Shell Folders\n\nThe following Registry keys can control automatic startup of services during boot:\n\nHKEY_LOCAL_MACHINE\\Software\\Microsoft\\Windows\\CurrentVersion\\RunServicesOnce\nHKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\RunServicesOnce\nHKEY_LOCAL_MACHINE\\Software\\Microsoft\\Windows\\CurrentVersion\\RunServices\nHKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\RunServices\n\nUsing policy settings to specify startup programs creates corresponding values in either of two Registry keys:\n\nHKEY_LOCAL_MACHINE\\Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\Run\nHKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\Run\n\nPrograms listed in the load value of the registry key HKEY_CURRENT_USER\\Software\\Microsoft\\Windows NT\\CurrentVersion\\Windows run automatically for the currently logged-on user.\nBy default, the multistring BootExecute value of the registry key HKEY_LOCAL_MACHINE\\System\\CurrentControlSet\\Control\\Session Manager is set to autocheck autochk *. This value causes Windows, at startup, to check the file-system integrity of the hard disks if the system has been shut down abnormally. Adversaries can add other programs or processes to this registry value which will automatically launch at boot.\nAdversaries can use these configuration locations to execute malware, such as remote access tools, to maintain persistence through system reboots. Adversaries may also use Masquerading to make the Registry entries look as if they are associated with legitimate programs.",
-              "signatures": [
-                {
-                  "severity": "INFO",
-                  "description": "Stores files to the Windows startup directory",
-                  "match_data": [
-                    "C:\\Users\\user\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\RenewOnCallTime.vbs"
-                  ]
-                },
-                {
-                  "severity": "INFO",
-                  "description": "Creates a start menu entry (Start Menu\\\\Programs\\\\Startup)",
-                  "match_data": [
-                    "C:\\Users\\user\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\RenewOnCallTime.vbs"
-                  ]
-                }
-              ]
-            },
-            {
-              "id": "T1574",
-              "name": "Hijack Execution Flow",
-              "link": "https://attack.mitre.org/techniques/T1574/",
-              "description": "Adversaries may execute their own malicious payloads by hijacking the way operating systems run programs. Hijacking execution flow can be for the purposes of persistence, since this hijacked execution may reoccur over time. Adversaries may also use these mechanisms to elevate privileges or evade defenses, such as application control or other restrictions on execution.\nThere are many ways an adversary may hijack the flow of execution, including by manipulating how the operating system locates programs to be executed. How the operating system locates libraries to be used by a program can also be intercepted. Locations where the operating system looks for programs/resources, such as file directories and in the case of Windows the Registry, could also be poisoned to include malicious payloads."
-            },
-            {
-              "id": "T1574.002",
-              "name": "DLL Side-Loading",
-              "link": "https://attack.mitre.org/techniques/T1574/002/",
-              "description": "Adversaries may execute their own malicious payloads by side-loading DLLs. Similar to DLL, side-loading involves hijacking which DLL a program loads. But rather than just planting the DLL within the search order of a program then waiting for the victim application to be invoked, adversaries may directly side-load their payloads by planting then invoking a legitimate application that executes their payload(s).\nSide-loading takes advantage of the DLL search order used by the loader by positioning both the victim application and malicious payload(s) alongside each other. Adversaries likely use side-loading as a means of masking actions they perform under a legitimate, trusted, and potentially elevated system or software process. Benign executables used to side-load payloads may not be flagged during delivery and/or execution. Adversary payloads may also be encrypted/packed or otherwise obfuscated until loaded into the memory of the trusted process.",
-              "signatures": [
-                {
-                  "severity": "INFO",
-                  "description": "Tries to load missing DLLs",
-                  "match_data": [
-                    "mscoree.dll",
-                    "apphelp.dll",
-                    "kernel.appcore.dll",
-                    "version.dll",
-                    "vcruntime140_1_clr0400.dll",
-                    "vcruntime140_clr0400.dll",
-                    "ucrtbase_clr0400.dll",
-                    "uxtheme.dll",
-                    "windows.storage.dll",
-                    "wintypes.dll",
-                    "profapi.dll",
-                    "bcrypt.dll",
-                    "cryptsp.dll",
-                    "rsaenh.dll",
-                    "cryptbase.dll",
-                    "wldp.dll",
-                    "amsi.dll",
-                    "userenv.dll",
-                    "msasn1.dll",
-                    "gpapi.dll",
-                    "dwrite.dll",
-                    "rasapi32.dll",
-                    "rtutils.dll",
-                    "rasman.dll",
-                    "mswsock.dll",
-                    "winhttp.dll",
-                    "ondemandconnroutehelper.dll",
-                    "iphlpapi.dll",
-                    "dhcpcsvc6.dll",
-                    "dhcpcsvc.dll",
-                    "dnsapi.dll",
-                    "ntmarta.dll",
-                    "winnsi.dll",
-                    "rasadhlp.dll",
-                    "fwpuclnt.dll",
-                    "secur32.dll",
-                    "sspicli.dll",
-                    "schannel.dll",
-                    "ncrypt.dll",
-                    "ntasn1.dll",
-                    "ncryptsslp.dll"
-                  ]
-                }
-              ]
-            },
-            {
-              "id": "T1055",
-              "name": "Process Injection",
-              "link": "https://attack.mitre.org/techniques/T1055/",
-              "description": "Adversaries may inject code into processes in order to evade process-based defenses as well as possibly elevate privileges. Process injection is a method of executing arbitrary code in the address space of a separate live process. Running code in the context of another process may allow access to the process's memory, system/network resources, and possibly elevated privileges. Execution via process injection may also evade detection from security products since the execution is masked under a legitimate process. \nThere are many different ways to inject code into a process, many of which abuse legitimate functionalities. These implementations exist for every major OS but are typically platform specific. \nMore sophisticated samples may perform multiple process injections to segment modules and further evade detection, utilizing named pipes or other inter-process communication (IPC) mechanisms as a communication channel. ",
-              "signatures": [
-                {
-                  "severity": "LOW",
-                  "description": "Injects a PE file into a foreign processes",
-                  "match_data": [
-                    "C:\\Windows\\Microsoft.NET\\Framework64\\v4.0.30319\\InstallUtil.exe base: 140000000 value starts with: 4D5A"
-                  ]
-                },
-                {
-                  "severity": "LOW",
-                  "description": "Writes to foreign memory regions",
-                  "match_data": [
-                    "C:\\Windows\\Microsoft.NET\\Framework64\\v4.0.30319\\InstallUtil.exe base: 140000000",
-                    "C:\\Windows\\Microsoft.NET\\Framework64\\v4.0.30319\\InstallUtil.exe base: 140002000",
-                    "C:\\Windows\\Microsoft.NET\\Framework64\\v4.0.30319\\InstallUtil.exe base: 140046000",
-                    "C:\\Windows\\Microsoft.NET\\Framework64\\v4.0.30319\\InstallUtil.exe base: 5FF0D9C010"
-                  ]
-                },
-                {
-                  "severity": "LOW",
-                  "description": "Modifies the context of a thread in another process (thread injection)",
-                  "match_data": [
-                    "target process: 1220"
-                  ]
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "id": "TA0007",
-          "name": "Discovery",
-          "link": "https://attack.mitre.org/tactics/TA0007/",
-          "description": "The adversary is trying to figure out your environment.\n\nDiscovery consists of techniques an adversary may use to gain knowledge about the system and internal network. These techniques help adversaries observe the environment and orient themselves before deciding how to act. They also allow adversaries to explore what they can control and what\u2019s around their entry point in order to discover how it could benefit their current objective. Native operating system tools are often used toward this post-compromise information-gathering objective. ",
-          "techniques": [
-            {
-              "id": "T1497",
-              "name": "Virtualization/Sandbox Evasion",
-              "link": "https://attack.mitre.org/techniques/T1497/",
-              "description": "Adversaries may employ various means to detect and avoid virtualization and analysis environments. This may include changing behaviors based on the results of checks for the presence of artifacts indicative of a virtual machine environment (VME) or sandbox. If the adversary detects a VME, they may alter their malware to disengage from the victim or conceal the core functions of the implant. They may also search for VME artifacts before dropping secondary or additional payloads. Adversaries may use the information learned from Virtualization/Sandbox Evasion during automated discovery to shape follow-on behaviors.\nAdversaries may use several methods to accomplish Virtualization/Sandbox Evasion such as checking for security monitoring tools (e.g., Sysinternals, Wireshark, etc.) or other system artifacts associated with analysis or virtualization. Adversaries may also check for legitimate user activity to help determine if it is in an analysis environment. Additional methods include use of sleep timers or loops within malware code to avoid operating within a temporary sandbox.",
-              "signatures": [
-                {
-                  "severity": "INFO",
-                  "description": "Contains medium sleeps (>= 30s)",
-                  "match_data": [
-                    "delay time: 922337203685477",
-                    "delay time: 600000",
-                    "delay time: 599485",
-                    "delay time: 599194",
-                    "delay time: 599076",
-                    "delay time: 598935",
-                    "delay time: 598819",
-                    "delay time: 597169",
-                    "delay time: 596085"
-                  ]
-                },
-                {
-                  "severity": "INFO",
-                  "description": "Contains long sleeps (>= 3 min)",
-                  "match_data": [
-                    "delay time: 922337203685477",
-                    "delay time: 600000",
-                    "delay time: 599485",
-                    "delay time: 599194",
-                    "delay time: 599076",
-                    "delay time: 598935",
-                    "delay time: 598819",
-                    "delay time: 597169",
-                    "delay time: 596085"
-                  ]
-                },
-                {
-                  "severity": "INFO",
-                  "description": "May sleep (evasive loops) to hinder dynamic analysis",
-                  "match_data": [
-                    "-1844674407370954s >= -30000s",
-                    "-600000s >= -30000s",
-                    "-599485s >= -30000s",
-                    "-599194s >= -30000s",
-                    "-599076s >= -30000s",
-                    "-598935s >= -30000s",
-                    "-598819s >= -30000s",
-                    "-597169s >= -30000s",
-                    "-596085s >= -30000s",
-                    "-922337203685477s >= -30000s"
-                  ]
-                },
-                {
-                  "severity": "INFO",
-                  "description": "Allocates memory with a write watch (potentially for evading sandboxes)",
-                  "match_data": [
-                    "204A3950000 memory reserve | memory write watch",
-                    "204BD3A0000 memory reserve | memory write watch",
-                    "1EA32260000 memory reserve | memory write watch",
-                    "1EA4A3A0000 memory reserve | memory write watch"
-                  ]
-                }
-              ]
-            },
-            {
-              "id": "T1518",
-              "name": "Software Discovery",
-              "link": "https://attack.mitre.org/techniques/T1518/",
-              "description": "Adversaries may attempt to get a listing of software and software versions that are installed on a system or in a cloud environment. Adversaries may use the information from Software Discovery during automated discovery to shape follow-on behaviors, including whether or not the adversary fully infects the target and/or attempts specific actions.\nSuch software may be deployed widely across the environment for configuration management or security reasons, such as Software Deployment Tools, and may allow adversaries broad access to infect devices or move laterally.\nAdversaries may attempt to enumerate software for a variety of reasons, such as figuring out what security measures are present or if the compromised system has a version of software that is vulnerable to Exploitation for Privilege Escalation."
-            },
-            {
-              "id": "T1518.001",
-              "name": "Security Software Discovery",
-              "link": "https://attack.mitre.org/techniques/T1518/001/",
-              "description": "Adversaries may attempt to get a listing of security software, configurations, defensive tools, and sensors that are installed on a system or in a cloud environment. This may include things such as cloud monitoring agents and anti-virus. Adversaries may use the information from Security Software Discovery during automated discovery to shape follow-on behaviors, including whether or not the adversary fully infects the target and/or attempts specific actions.\nExample commands that can be used to obtain security software information are netsh, reg query with Reg, dir with cmd, and Tasklist, but other indicators of discovery behavior may be more specific to the type of software or security system the adversary is looking for. It is becoming more common to see macOS malware perform checks for LittleSnitch and KnockKnock software.\nAdversaries may also utilize the Cloud API to discover cloud-native security software installed on compute infrastructure, such as the AWS CloudWatch agent, Azure VM Agent, and Google Cloud Monitor agent. These agents  may collect  metrics and logs from the VM, which may be centrally aggregated in a cloud-based monitoring platform.",
-              "signatures": [
-                {
-                  "severity": "INFO",
-                  "description": "May try to detect the virtual machine to hinder analysis (VM artifact strings found in memory)",
-                  "match_data": [
-                    "VMware|VIRTUAL|A M I|Xen",
-                    "Microsoft|VMWare|Virtual",
-                    "Hyper-V RAW%SystemRoot%\\system32\\mswsock.dll"
-                  ]
-                },
-                {
-                  "severity": "LOW",
-                  "description": "Tries to detect sandboxes and other dynamic analysis tools",
-                  "match_data": [
-                    "SBIEDLL.DLL"
-                  ]
-                }
-              ]
-            },
-            {
-              "id": "T1057",
-              "name": "Process Discovery",
-              "link": "https://attack.mitre.org/techniques/T1057/",
-              "description": "Adversaries may attempt to get information about running processes on a system. Information obtained could be used to gain an understanding of common software/applications running on systems within the network. Administrator or otherwise elevated access may provide better process details. Adversaries may use the information from Process Discovery during automated discovery to shape follow-on behaviors, including whether or not the adversary fully infects the target and/or attempts specific actions.\nIn Windows environments, adversaries could obtain details on running processes using the Tasklist utility via cmd or Get-Process via PowerShell. Information about processes can also be extracted from the output of Native API calls such as CreateToolhelp32Snapshot. In Mac and Linux, this is accomplished with the ps command. Adversaries may also opt to enumerate processes via /proc. ESXi also supports use of the ps command, as well as esxcli system process list.\nOn network devices, Network Device CLI commands such as show processes can be used to display current running processes.",
-              "signatures": [
-                {
-                  "severity": "INFO",
-                  "description": "Queries a list of all running processes",
-                  "match_data": [
-                    "ProcessInformation"
-                  ]
-                }
-              ]
-            },
-            {
-              "id": "T1016",
-              "name": "System Network Configuration Discovery",
-              "link": "https://attack.mitre.org/techniques/T1016/",
-              "description": "Adversaries may look for details about the network configuration and settings, such as IP and/or MAC addresses, of systems they access or through information discovery of remote systems. Several operating system administration utilities exist that can be used to gather this information. Examples include Arp, ipconfig/ifconfig, nbtstat, and route.\nAdversaries may also leverage a Network Device CLI on network devices to gather information about configurations and settings, such as IP addresses of configured interfaces and static/dynamic routes (e.g. show ip route, show ip interface). On ESXi, adversaries may leverage esxcli to gather network configuration information. For example, the command esxcli network nic list will retrieve the MAC address, while esxcli network ip interface ipv4 get will retrieve the local IPv4 address.\nAdversaries may use the information from System Network Configuration Discovery during automated discovery to shape follow-on behaviors, including determining certain access within the target network and what actions to do next. ",
-              "signatures": [
-                {
-                  "severity": "LOW",
-                  "description": "Checks the online ip address of the machine",
-                  "match_data": [
-                    "name: checkip.dyndns.org",
-                    "name: reallyfreegeoip.org"
-                  ]
-                }
-              ]
-            },
-            {
-              "id": "T1082",
-              "name": "System Information Discovery",
-              "link": "https://attack.mitre.org/techniques/T1082/",
-              "description": "An adversary may attempt to get detailed information about the operating system and hardware, including version, patches, hotfixes, service packs, and architecture. Adversaries may use this information to shape follow-on behaviors, including whether or not the adversary fully infects the target and/or attempts specific actions. This behavior is distinct from Local Storage Discovery which is an adversary's discovery of local drive, disks and/or volumes.\nTools such as Systeminfo can be used to gather detailed system information. If running with privileged access, a breakdown of system data can be gathered through the systemsetup configuration tool on macOS. Adversaries may leverage a Network Device CLI on network devices to gather detailed system information (e.g. show version). On ESXi servers, threat actors may gather system information from various esxcli utilities, such as system hostname get and system version get.\nInfrastructure as a Service (IaaS) cloud providers such as AWS, GCP, and Azure allow access to instance and virtual machine information via APIs. Successful authenticated API calls can return data such as the operating system platform and status of a particular instance or the model view of a virtual machine.\nSystem Information Discovery combined with information gathered from other forms of discovery and reconnaissance can drive payload development and concealment. ",
-              "signatures": [
-                {
-                  "severity": "INFO",
-                  "description": "Queries the cryptographic machine GUID",
-                  "match_data": [
-                    "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Cryptography MachineGuid"
-                  ]
-                },
-                {
-                  "severity": "INFO",
-                  "description": "Reads software policies",
-                  "match_data": [
-                    "HKEY_LOCAL_MACHINE\\Software\\Policies\\Microsoft\\Windows\\Safer\\CodeIdentifiers"
-                  ]
-                },
-                {
-                  "severity": "INFO",
-                  "description": "Queries the volume information (name, serial number etc) of a device",
-                  "match_data": [
-                    "C:\\Users\\user\\Desktop\\XALKIS SA Purchase Order -  317557.exe VolumeInformation",
-                    "C:\\Program Files\\WindowsApps\\Microsoft.WindowsTerminal_1.12.10983.0_x64__8wekyb3d8bbwe\\CascadiaCode.ttf VolumeInformation",
-                    "C:\\Program Files\\WindowsApps\\Microsoft.WindowsTerminal_1.12.10983.0_x64__8wekyb3d8bbwe\\CascadiaCodeItalic.ttf VolumeInformation",
-                    "C:\\Program Files\\WindowsApps\\Microsoft.WindowsTerminal_1.12.10983.0_x64__8wekyb3d8bbwe\\CascadiaMono.ttf VolumeInformation",
-                    "C:\\Program Files\\WindowsApps\\Microsoft.WindowsTerminal_1.12.10983.0_x64__8wekyb3d8bbwe\\CascadiaMonoItalic.ttf VolumeInformation",
-                    "C:\\Windows\\Microsoft.NET\\Framework64\\v4.0.30319\\InstallUtil.exe VolumeInformation"
-                  ]
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "id": "TA0009",
-          "name": "Collection",
-          "link": "https://attack.mitre.org/tactics/TA0009/",
-          "description": "The adversary is trying to gather data of interest to their goal.\n\nCollection consists of techniques adversaries may use to gather information and the sources information is collected from that are relevant to following through on the adversary's objectives. Frequently, the next goal after collecting data is to either steal (exfiltrate) the data or to use the data to gain more information about the target environment. Common target sources include various drive types, browsers, audio, video, and email. Common collection methods include capturing screenshots and keyboard input.",
-          "techniques": [
-            {
-              "id": "T1560",
-              "name": "Archive Collected Data",
-              "link": "https://attack.mitre.org/techniques/T1560/",
-              "description": "An adversary may compress and/or encrypt data that is collected prior to exfiltration. Compressing the data can help to obfuscate the collected data and minimize the amount of data sent over the network. Encryption can be used to hide information that is being exfiltrated from detection or make exfiltration less conspicuous upon inspection by a defender.\nBoth compression and encryption are done prior to exfiltration, and can be performed using a utility, 3rd party library, or custom method.",
-              "signatures": [
-                {
-                  "severity": "INFO",
-                  "description": ".NET source code contains calls to encryption/decryption functions",
-                  "match_data": [
-                    "'CreateDecryptor'"
-                  ]
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "id": "TA0011",
-          "name": "Command and Control",
-          "link": "https://attack.mitre.org/tactics/TA0011/",
-          "description": "The adversary is trying to communicate with compromised systems to control them.\n\nCommand and Control consists of techniques that adversaries may use to communicate with systems under their control within a victim network. Adversaries commonly attempt to mimic normal, expected traffic to avoid detection. There are many ways an adversary can establish command and control with various levels of stealth depending on the victim\u2019s network structure and defenses.",
-          "techniques": [
-            {
-              "id": "T1102",
-              "name": "Web Service",
-              "link": "https://attack.mitre.org/techniques/T1102/",
-              "description": "Adversaries may use an existing, legitimate external Web service as a means for relaying data to/from a compromised system. Popular websites, cloud services, and social media acting as a mechanism for C2 may give a significant amount of cover due to the likelihood that hosts within a network are already communicating with them prior to a compromise. Using common services, such as those offered by Google, Microsoft, or Twitter, makes it easier for adversaries to hide in expected noise. Web service providers commonly use SSL/TLS encryption, giving adversaries an added level of protection.\nUse of Web services may also protect back-end C2 infrastructure from discovery through malware binary analysis while also enabling operational resiliency (since this infrastructure may be dynamically changed).",
-              "signatures": [
-                {
-                  "severity": "LOW",
-                  "description": "Connects to a pastebin service (like for C&C)",
-                  "match_data": [
-                    "name: api.telegram.org"
-                  ]
-                }
-              ]
-            },
-            {
-              "id": "T1573",
-              "name": "Encrypted Channel",
-              "link": "https://attack.mitre.org/techniques/T1573/",
-              "description": "Adversaries may employ an encryption algorithm to conceal command and control traffic rather than relying on any inherent protections provided by a communication protocol. Despite the use of a secure algorithm, these implementations may be vulnerable to reverse engineering if secret keys are encoded and/or generated within malware samples/configuration files.",
-              "signatures": [
-                {
-                  "severity": "INFO",
-                  "description": "Uses HTTPS for network communication, use the SSL MITM Proxy cookbook for further analysis"
-                },
-                {
-                  "severity": "INFO",
-                  "description": "Uses HTTPS",
-                  "match_data": [
-                    "HTTP traffic on port 49733 -> 443",
-                    "HTTP traffic on port 443 -> 49733",
-                    "HTTP traffic on port 443 -> 49731",
-                    "HTTP traffic on port 49731 -> 443",
-                    "HTTP traffic on port 49726 -> 443",
-                    "HTTP traffic on port 49727 -> 443",
-                    "HTTP traffic on port 49729 -> 443",
-                    "HTTP traffic on port 443 -> 49729",
-                    "HTTP traffic on port 443 -> 49727",
-                    "HTTP traffic on port 443 -> 49738",
-                    "HTTP traffic on port 443 -> 49726",
-                    "HTTP traffic on port 49735 -> 443",
-                    "HTTP traffic on port 443 -> 49735",
-                    "HTTP traffic on port 49738 -> 443"
-                  ]
-                }
-              ]
-            },
-            {
-              "id": "T1105",
-              "name": "Ingress Tool Transfer",
-              "link": "https://attack.mitre.org/techniques/T1105/",
-              "description": "Adversaries may transfer tools or other files from an external system into a compromised environment. Tools or files may be copied from an external adversary-controlled system to the victim network through the command and control channel or through alternate protocols such as ftp. Once present, adversaries may also transfer/spread tools between victim devices within a compromised environment (i.e. Lateral Tool Transfer). \nOn Windows, adversaries may use various utilities to download tools, such as copy, finger, certutil, and PowerShell commands such as IEX(New-Object Net.WebClient).downloadString() and Invoke-WebRequest. On Linux and macOS systems, a variety of utilities also exist, such as curl, scp, sftp, tftp, rsync, finger, and wget.  A number of these tools, such as wget, curl, and scp, also exist on ESXi. After downloading a file, a threat actor may attempt to verify its integrity by checking its hash value (e.g., via certutil -hashfile).\nAdversaries may also abuse installers and package managers, such as yum or winget, to download tools to victim hosts. Adversaries have also abused file application features, such as the Windows search-ms protocol handler, to deliver malicious files to victims through remote file searches invoked by User Execution (typically after interacting with Phishing lures).\nFiles can also be transferred using various Web Services as well as native or otherwise present tools on the victim system. In some cases, adversaries may be able to leverage services that sync between a web-based and an on-premises client, such as Dropbox or OneDrive, to transfer files onto victim systems. For example, by compromising a cloud account and logging into the service's web portal, an adversary may be able to trigger an automatic syncing process that transfers the file onto the victim's machine.",
-              "signatures": [
-                {
-                  "severity": "INFO",
-                  "description": "Downloads files from webservers via HTTP",
-                  "match_data": [
-                    "GET /Chnhsr.wav HTTP/1.1User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 12_6_3) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.3 Safari/605.1.15Host: 196.251.92.12Connection: Keep-Alive",
-                    "GET / HTTP/1.1User-Agent: Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; .NET CLR1.0.3705;)Host: checkip.dyndns.orgConnection: Keep-Alive",
-                    "GET / HTTP/1.1User-Agent: Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; .NET CLR1.0.3705;)Host: checkip.dyndns.org"
-                  ]
-                }
-              ]
-            },
-            {
-              "id": "T1095",
-              "name": "Non-Application Layer Protocol",
-              "link": "https://attack.mitre.org/techniques/T1095/",
-              "description": "Adversaries may use an OSI non-application layer protocol for communication between host and C2 server or among infected hosts within a network. The list of possible protocols is extensive. Specific examples include use of network layer protocols, such as the Internet Control Message Protocol (ICMP), transport layer protocols, such as the User Datagram Protocol (UDP), session layer protocols, such as Socket Secure (SOCKS), as well as redirected/tunneled protocols, such as Serial over LAN (SOL).\nICMP communication between hosts is one example. Because ICMP is part of the Internet Protocol Suite, it is required to be implemented by all IP-compatible hosts. However, it is not as commonly monitored as other Internet Protocols such as TCP or UDP and may be used by adversaries to hide communications.\nIn ESXi environments, adversaries may leverage the Virtual Machine Communication Interface (VMCI) for communication between guest virtual machines and the ESXi host. This traffic is similar to client-server communications on traditional network sockets but is localized to the physical machine running the ESXi host, meaning it does not traverse external networks (routers, switches). This results in communications that are invisible to external monitoring and standard networking tools like tcpdump, netstat, nmap, and Wireshark. By adding a VMCI backdoor to a compromised ESXi host, adversaries may persistently regain access from any guest VM to the compromised ESXi host\u2019s backdoor, regardless of network segmentation or firewall rules in place.",
-              "signatures": [
-                {
-                  "severity": "INFO",
-                  "description": "Performs DNS lookups",
-                  "match_data": [
-                    "DNS query: checkip.dyndns.org",
-                    "DNS query: reallyfreegeoip.org",
-                    "DNS query: api.telegram.org",
-                    "DNS query: mail.privateemail.com",
-                    "DNS query: assets.msn.com",
-                    "DNS query: www.msn.com",
-                    "DNS query: api.msn.com",
-                    "DNS query: deff.nelreports.net",
-                    "DNS query: srtb.msn.com"
-                  ]
-                },
-                {
-                  "severity": "INFO",
-                  "description": "Downloads files from webservers via HTTP",
-                  "match_data": [
-                    "GET /Chnhsr.wav HTTP/1.1User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 12_6_3) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.3 Safari/605.1.15Host: 196.251.92.12Connection: Keep-Alive",
-                    "GET / HTTP/1.1User-Agent: Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; .NET CLR1.0.3705;)Host: checkip.dyndns.orgConnection: Keep-Alive",
-                    "GET / HTTP/1.1User-Agent: Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; .NET CLR1.0.3705;)Host: checkip.dyndns.org"
-                  ]
-                }
-              ]
-            },
-            {
-              "id": "T1071",
-              "name": "Application Layer Protocol",
-              "link": "https://attack.mitre.org/techniques/T1071/",
-              "description": "Adversaries may communicate using OSI application layer protocols to avoid detection/network filtering by blending in with existing traffic. Commands to the remote system, and often the results of those commands, will be embedded within the protocol traffic between the client and server. \nAdversaries may utilize many different protocols, including those used for web browsing, transferring files, electronic mail, DNS, or publishing/subscribing. For connections that occur internally within an enclave (such as those between a proxy or pivot node and other nodes), commonly used protocols are SMB, SSH, or RDP. ",
-              "signatures": [
-                {
-                  "severity": "INFO",
-                  "description": "Uses a known web browser user agent for HTTP communication",
-                  "match_data": [
-                    "GET /Chnhsr.wav HTTP/1.1User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 12_6_3) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.3 Safari/605.1.15Host: 196.251.92.12Connection: Keep-Alive",
-                    "GET / HTTP/1.1User-Agent: Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; .NET CLR1.0.3705;)Host: checkip.dyndns.orgConnection: Keep-Alive",
-                    "GET / HTTP/1.1User-Agent: Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; .NET CLR1.0.3705;)Host: checkip.dyndns.org"
-                  ]
-                },
-                {
-                  "severity": "INFO",
-                  "description": "Performs DNS lookups",
-                  "match_data": [
-                    "DNS query: checkip.dyndns.org",
-                    "DNS query: reallyfreegeoip.org",
-                    "DNS query: api.telegram.org",
-                    "DNS query: mail.privateemail.com",
-                    "DNS query: assets.msn.com",
-                    "DNS query: www.msn.com",
-                    "DNS query: api.msn.com",
-                    "DNS query: deff.nelreports.net",
-                    "DNS query: srtb.msn.com"
-                  ]
-                },
-                {
-                  "severity": "INFO",
-                  "description": "Downloads files from webservers via HTTP",
-                  "match_data": [
-                    "GET /Chnhsr.wav HTTP/1.1User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 12_6_3) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.3 Safari/605.1.15Host: 196.251.92.12Connection: Keep-Alive",
-                    "GET / HTTP/1.1User-Agent: Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; .NET CLR1.0.3705;)Host: checkip.dyndns.orgConnection: Keep-Alive",
-                    "GET / HTTP/1.1User-Agent: Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; .NET CLR1.0.3705;)Host: checkip.dyndns.org"
-                  ]
-                },
-                {
-                  "severity": "INFO",
-                  "description": "Uses HTTPS",
-                  "match_data": [
-                    "HTTP traffic on port 49733 -> 443",
-                    "HTTP traffic on port 443 -> 49733",
-                    "HTTP traffic on port 443 -> 49731",
-                    "HTTP traffic on port 49731 -> 443",
-                    "HTTP traffic on port 49726 -> 443",
-                    "HTTP traffic on port 49727 -> 443",
-                    "HTTP traffic on port 49729 -> 443",
-                    "HTTP traffic on port 443 -> 49729",
-                    "HTTP traffic on port 443 -> 49727",
-                    "HTTP traffic on port 443 -> 49738",
-                    "HTTP traffic on port 443 -> 49726",
-                    "HTTP traffic on port 49735 -> 443",
-                    "HTTP traffic on port 443 -> 49735",
-                    "HTTP traffic on port 49738 -> 443"
-                  ]
-                }
-              ]
-            }
-          ]
-        }
-      ]
-    }
-  },
-  "links": {
-    "self": "https://www.virustotal.com/api/v3/files/efd8561fa3d2930e6a27347cfd2b563b3c6627759cee379b6e479aaacb336e72/behaviour_mitre_trees"
-  }
+        "legendItems": [],
+        "metadata": [],
+        "showTacticRowBackground": false,
+        "tacticRowBackground": "#dddddd",
+        "selectTechniquesAcrossTactics": true,
+        "selectSubtechniquesWithParent": false
 }
