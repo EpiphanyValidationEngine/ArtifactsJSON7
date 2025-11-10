@@ -1,0 +1,884 @@
+{
+  "data": {
+    "CAPA": {
+      "tactics": [
+        {
+          "id": "TA0005",
+          "name": "Defense Evasion",
+          "link": "https://attack.mitre.org/tactics/TA0005/",
+          "description": "The adversary is trying to avoid being detected.\n\nDefense Evasion consists of techniques that adversaries use to avoid detection throughout their compromise. Techniques used for defense evasion include uninstalling/disabling security software or obfuscating/encrypting data and scripts. Adversaries also leverage and abuse trusted processes to hide and masquerade their malware. Other tactics\u2019 techniques are cross-listed here when those techniques include the added benefit of subverting defenses. ",
+          "techniques": [
+            {
+              "id": "T1620",
+              "name": "Reflective Code Loading",
+              "link": "https://attack.mitre.org/techniques/T1620/",
+              "description": "Adversaries may reflectively load code into a process in order to conceal the execution of malicious payloads. Reflective loading involves allocating then executing payloads directly within the memory of the process, vice creating a thread or process backed by a file path on disk (e.g., Shared Modules).\nReflectively loaded payloads may be compiled binaries, anonymous files (only present in RAM), or just snubs of fileless executable code (ex: position-independent shellcode). For example, the Assembly.Load() method executed by PowerShell may be abused to load raw code into the running process.\nReflective code injection is very similar to Process Injection except that the \u201cinjection\u201d loads code into the processes\u2019 own memory instead of that of a separate process. Reflective loading may evade process-based detections since the execution of the arbitrary code may be masked within a legitimate or otherwise benign process. Reflectively loading payloads directly into memory may also avoid creating files or other artifacts on disk, while also enabling malware to keep these payloads encrypted (or otherwise obfuscated) until execution.",
+              "signatures": [
+                {
+                  "severity": "INFO",
+                  "description": "load .NET assembly",
+                  "match_data": [
+                    "api: System.Reflection.Assembly::Load"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "TA0007",
+          "name": "Discovery",
+          "link": "https://attack.mitre.org/tactics/TA0007/",
+          "description": "The adversary is trying to figure out your environment.\n\nDiscovery consists of techniques an adversary may use to gain knowledge about the system and internal network. These techniques help adversaries observe the environment and orient themselves before deciding how to act. They also allow adversaries to explore what they can control and what\u2019s around their entry point in order to discover how it could benefit their current objective. Native operating system tools are often used toward this post-compromise information-gathering objective. ",
+          "techniques": [
+            {
+              "id": "T1083",
+              "name": "File and Directory Discovery",
+              "link": "https://attack.mitre.org/techniques/T1083/",
+              "description": "Adversaries may enumerate files and directories or may search in specific locations of a host or network share for certain information within a file system. Adversaries may use the information from File and Directory Discovery during automated discovery to shape follow-on behaviors, including whether or not the adversary fully infects the target and/or attempts specific actions.\nMany command shell utilities can be used to obtain this information. Examples include dir, tree, ls, find, and locate. Custom tools may also be used to gather file and directory information and interact with the Native API. Adversaries may also leverage a Network Device CLI on network devices to gather file and directory information (e.g. dir, show flash, and/or nvram).\nSome files and directories may require elevated or specific user permissions to access.",
+              "signatures": [
+                {
+                  "severity": "INFO",
+                  "description": "check if file exists",
+                  "match_data": [
+                    "api: System.IO.File::Exists"
+                  ]
+                },
+                {
+                  "severity": "INFO",
+                  "description": "get common file path",
+                  "match_data": [
+                    "api: System.Environment::GetFolderPath"
+                  ]
+                },
+                {
+                  "severity": "INFO",
+                  "description": "get file size",
+                  "match_data": [
+                    "property: System.IO.FileInfo::Length"
+                  ]
+                },
+                {
+                  "severity": "INFO",
+                  "description": "check if directory exists",
+                  "match_data": [
+                    "api: System.IO.Directory::Exists"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "VMRay": {
+      "tactics": [
+        {
+          "id": "TA0009",
+          "name": "Collection",
+          "link": "https://attack.mitre.org/tactics/TA0009/",
+          "description": "The adversary is trying to gather data of interest to their goal.\n\nCollection consists of techniques adversaries may use to gather information and the sources information is collected from that are relevant to following through on the adversary's objectives. Frequently, the next goal after collecting data is to either steal (exfiltrate) the data or to use the data to gain more information about the target environment. Common target sources include various drive types, browsers, audio, video, and email. Common collection methods include capturing screenshots and keyboard input.",
+          "techniques": [
+            {
+              "id": "T1005",
+              "name": "Data from Local System",
+              "link": "https://attack.mitre.org/techniques/T1005/",
+              "description": "Adversaries may search local system sources, such as file systems, configuration files, local databases, or virtual machine files, to find files of interest and sensitive data prior to Exfiltration.\nAdversaries may do this using a Command and Scripting Interpreter, such as cmd as well as a Network Device CLI, which have functionality to interact with the file system to gather information. Adversaries may also use Automated Collection on the local system.",
+              "signatures": [
+                {
+                  "severity": "LOW",
+                  "description": "Searches for sensitive browser data",
+                  "match_data": [
+                    "dekont20250805.exe searches for sensitive data of web browser \"Opera\" by file.",
+                    "dekont20250805.exe searches for sensitive data of web browser \"Brave\" by file.",
+                    "dekont20250805.exe searches for sensitive data of web browser \"Google Chrome\" by file.",
+                    "dekont20250805.exe searches for sensitive data of web browser \"Internet Explorer / Edge\" by file.",
+                    "dekont20250805.exe searches for sensitive data of web browser \"Mozilla Firefox\" by file.",
+                    "dekont20250805.exe searches for sensitive data of web browser \"BlackHawk\" by file.",
+                    "dekont20250805.exe searches for sensitive data of web browser \"Cyberfox\" by file.",
+                    "dekont20250805.exe searches for sensitive data of web browser \"k-Meleon\" by file.",
+                    "dekont20250805.exe searches for sensitive data of web browser \"Comodo IceDragon\" by file.",
+                    "dekont20250805.exe searches for sensitive data of web browser \"Flock\" by file."
+                  ]
+                },
+                {
+                  "severity": "LOW",
+                  "description": "Reads sensitive browser data",
+                  "match_data": [
+                    "dekont20250805.exe tries to read credentials of web browser \"Internet Explorer\" by reading from the system's credential vault.",
+                    "dekont20250805.exe tries to read sensitive data of web browser \"Internet Explorer / Edge\" by file."
+                  ]
+                },
+                {
+                  "severity": "LOW",
+                  "description": "Searches for sensitive mail data",
+                  "match_data": [
+                    "dekont20250805.exe tries to access sensitive data of mail application \"Microsoft Outlook\" by registry.",
+                    "dekont20250805.exe tries to access sensitive data of mail application \"IncrediMail\" by registry."
+                  ]
+                },
+                {
+                  "severity": "LOW",
+                  "description": "Reads sensitive mail data",
+                  "match_data": [
+                    "dekont20250805.exe tries to read sensitive data of mail application \"Microsoft Outlook\" by registry."
+                  ]
+                },
+                {
+                  "severity": "LOW",
+                  "description": "Searches for sensitive application data",
+                  "match_data": [
+                    "dekont20250805.exe tries to access sensitive data of application \"WinSCP\" by registry.",
+                    "dekont20250805.exe tries to access sensitive data of application \"OpenVPN\" by registry.",
+                    "dekont20250805.exe tries to access sensitive data of application \"RealVNC\" by registry.",
+                    "dekont20250805.exe tries to access sensitive data of application \"TightVNC\" by registry.",
+                    "dekont20250805.exe tries to access sensitive data of application \"TigerVNC\" by registry."
+                  ]
+                },
+                {
+                  "severity": "LOW",
+                  "description": "Searches for sensitive FTP data",
+                  "match_data": [
+                    "dekont20250805.exe tries to access sensitive data of FTP application \"CoreFTP\" by registry."
+                  ]
+                },
+                {
+                  "severity": "HIGH",
+                  "description": "Tries to read cached credentials of various applications",
+                  "match_data": [
+                    "Tries to read sensitive data of: Internet Explorer, Internet Explorer / Edge, Microsoft Outlook."
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "T1119",
+              "name": "Automated Collection",
+              "link": "https://attack.mitre.org/techniques/T1119/",
+              "description": "Once established within a system or network, an adversary may use automated techniques for collecting internal data. Methods for performing this technique could include use of a Command and Scripting Interpreter to search for and copy information fitting set criteria such as file type, location, or name at specific time intervals. \nIn cloud-based environments, adversaries may also use cloud APIs, data pipelines, command line interfaces, or extract, transform, and load (ETL) services to automatically collect data. \nThis functionality could also be built into remote access tools. \nThis technique may incorporate use of other techniques such as File and Directory Discovery and Lateral Tool Transfer to identify and move files, as well as Cloud Service Dashboard and Cloud Storage Object Discovery to identify resources in cloud environments.",
+              "signatures": [
+                {
+                  "severity": "LOW",
+                  "description": "Searches for sensitive browser data",
+                  "match_data": [
+                    "dekont20250805.exe searches for sensitive data of web browser \"Opera\" by file.",
+                    "dekont20250805.exe searches for sensitive data of web browser \"Brave\" by file.",
+                    "dekont20250805.exe searches for sensitive data of web browser \"Google Chrome\" by file.",
+                    "dekont20250805.exe searches for sensitive data of web browser \"Internet Explorer / Edge\" by file.",
+                    "dekont20250805.exe searches for sensitive data of web browser \"Mozilla Firefox\" by file.",
+                    "dekont20250805.exe searches for sensitive data of web browser \"BlackHawk\" by file.",
+                    "dekont20250805.exe searches for sensitive data of web browser \"Cyberfox\" by file.",
+                    "dekont20250805.exe searches for sensitive data of web browser \"k-Meleon\" by file.",
+                    "dekont20250805.exe searches for sensitive data of web browser \"Comodo IceDragon\" by file.",
+                    "dekont20250805.exe searches for sensitive data of web browser \"Flock\" by file."
+                  ]
+                },
+                {
+                  "severity": "LOW",
+                  "description": "Reads sensitive browser data",
+                  "match_data": [
+                    "dekont20250805.exe tries to read credentials of web browser \"Internet Explorer\" by reading from the system's credential vault.",
+                    "dekont20250805.exe tries to read sensitive data of web browser \"Internet Explorer / Edge\" by file."
+                  ]
+                },
+                {
+                  "severity": "LOW",
+                  "description": "Searches for sensitive mail data",
+                  "match_data": [
+                    "dekont20250805.exe tries to access sensitive data of mail application \"Microsoft Outlook\" by registry.",
+                    "dekont20250805.exe tries to access sensitive data of mail application \"IncrediMail\" by registry."
+                  ]
+                },
+                {
+                  "severity": "LOW",
+                  "description": "Reads sensitive mail data",
+                  "match_data": [
+                    "dekont20250805.exe tries to read sensitive data of mail application \"Microsoft Outlook\" by registry."
+                  ]
+                },
+                {
+                  "severity": "LOW",
+                  "description": "Searches for sensitive application data",
+                  "match_data": [
+                    "dekont20250805.exe tries to access sensitive data of application \"WinSCP\" by registry.",
+                    "dekont20250805.exe tries to access sensitive data of application \"OpenVPN\" by registry.",
+                    "dekont20250805.exe tries to access sensitive data of application \"RealVNC\" by registry.",
+                    "dekont20250805.exe tries to access sensitive data of application \"TightVNC\" by registry.",
+                    "dekont20250805.exe tries to access sensitive data of application \"TigerVNC\" by registry."
+                  ]
+                },
+                {
+                  "severity": "LOW",
+                  "description": "Searches for sensitive FTP data",
+                  "match_data": [
+                    "dekont20250805.exe tries to access sensitive data of FTP application \"CoreFTP\" by registry."
+                  ]
+                },
+                {
+                  "severity": "HIGH",
+                  "description": "Tries to read cached credentials of various applications",
+                  "match_data": [
+                    "Tries to read sensitive data of: Internet Explorer, Internet Explorer / Edge, Microsoft Outlook."
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "TA0007",
+          "name": "Discovery",
+          "link": "https://attack.mitre.org/tactics/TA0007/",
+          "description": "The adversary is trying to figure out your environment.\n\nDiscovery consists of techniques an adversary may use to gain knowledge about the system and internal network. These techniques help adversaries observe the environment and orient themselves before deciding how to act. They also allow adversaries to explore what they can control and what\u2019s around their entry point in order to discover how it could benefit their current objective. Native operating system tools are often used toward this post-compromise information-gathering objective. ",
+          "techniques": [
+            {
+              "id": "T1012",
+              "name": "Query Registry",
+              "link": "https://attack.mitre.org/techniques/T1012/",
+              "description": "Adversaries may interact with the Windows Registry to gather information about the system, configuration, and installed software.\nThe Registry contains a significant amount of information about the operating system, configuration, software, and security. Information can easily be queried using the Reg utility, though other means to access the Registry exist. Some of the information may help adversaries to further their operation within a network. Adversaries may use the information from Query Registry during automated discovery to shape follow-on behaviors, including whether or not the adversary fully infects the target and/or attempts specific actions.",
+              "signatures": [
+                {
+                  "severity": "INFO",
+                  "description": "Query OS Information",
+                  "match_data": [
+                    "dekont20250805.exe reads installation type from registry."
+                  ]
+                },
+                {
+                  "severity": "LOW",
+                  "description": "Searches for sensitive mail data",
+                  "match_data": [
+                    "dekont20250805.exe tries to access sensitive data of mail application \"Microsoft Outlook\" by registry.",
+                    "dekont20250805.exe tries to access sensitive data of mail application \"IncrediMail\" by registry."
+                  ]
+                },
+                {
+                  "severity": "LOW",
+                  "description": "Reads sensitive mail data",
+                  "match_data": [
+                    "dekont20250805.exe tries to read sensitive data of mail application \"Microsoft Outlook\" by registry."
+                  ]
+                },
+                {
+                  "severity": "INFO",
+                  "description": "Possibly does reconnaissance",
+                  "match_data": [
+                    "dekont20250805.exe tries to gather information about application \"Qualcomm Eudora\" by registry.",
+                    "dekont20250805.exe tries to gather information about application \"Foxmail\" by registry.",
+                    "dekont20250805.exe tries to gather information about application \"WinSCP\" by registry.",
+                    "dekont20250805.exe tries to gather information about application \"RealVNC\" by registry.",
+                    "dekont20250805.exe tries to gather information about application \"TightVNC\" by registry.",
+                    "dekont20250805.exe tries to gather information about application \"TigerVNC\" by registry."
+                  ]
+                },
+                {
+                  "severity": "LOW",
+                  "description": "Searches for sensitive application data",
+                  "match_data": [
+                    "dekont20250805.exe tries to access sensitive data of application \"WinSCP\" by registry.",
+                    "dekont20250805.exe tries to access sensitive data of application \"OpenVPN\" by registry.",
+                    "dekont20250805.exe tries to access sensitive data of application \"RealVNC\" by registry.",
+                    "dekont20250805.exe tries to access sensitive data of application \"TightVNC\" by registry.",
+                    "dekont20250805.exe tries to access sensitive data of application \"TigerVNC\" by registry."
+                  ]
+                },
+                {
+                  "severity": "LOW",
+                  "description": "Searches for sensitive FTP data",
+                  "match_data": [
+                    "dekont20250805.exe tries to access sensitive data of FTP application \"CoreFTP\" by registry."
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "T1082",
+              "name": "System Information Discovery",
+              "link": "https://attack.mitre.org/techniques/T1082/",
+              "description": "An adversary may attempt to get detailed information about the operating system and hardware, including version, patches, hotfixes, service packs, and architecture. Adversaries may use the information from System Information Discovery during automated discovery to shape follow-on behaviors, including whether or not the adversary fully infects the target and/or attempts specific actions.\nTools such as Systeminfo can be used to gather detailed system information. If running with privileged access, a breakdown of system data can be gathered through the systemsetup configuration tool on macOS. As an example, adversaries with user-level access can execute the df -aH command to obtain currently mounted disks and associated freely available space. Adversaries may also leverage a Network Device CLI on network devices to gather detailed system information (e.g. show version). On ESXi servers, threat actors may gather system information from various esxcli utilities, such as system hostname get, system version get, and storage filesystem list (to list storage volumes).\nInfrastructure as a Service (IaaS) cloud providers such as AWS, GCP, and Azure allow access to instance and virtual machine information via APIs. Successful authenticated API calls can return data such as the operating system platform and status of a particular instance or the model view of a virtual machine.\nSystem Information Discovery combined with information gathered from other forms of discovery and reconnaissance can drive payload development and concealment. ",
+              "signatures": [
+                {
+                  "severity": "INFO",
+                  "description": "Query OS Information",
+                  "match_data": [
+                    "dekont20250805.exe reads installation type from registry."
+                  ]
+                },
+                {
+                  "severity": "LOW",
+                  "description": "Queries OS version via WMI",
+                  "match_data": [
+                    "dekont20250805.exe queries OS version via WMI query: select * from Win32_OperatingSystem."
+                  ]
+                },
+                {
+                  "severity": "LOW",
+                  "description": "Collects hardware properties",
+                  "match_data": [
+                    "dekont20250805.exe queries hardware properties via WMI: SELECT * FROM Win32_Processor."
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "T1083",
+              "name": "File and Directory Discovery",
+              "link": "https://attack.mitre.org/techniques/T1083/",
+              "description": "Adversaries may enumerate files and directories or may search in specific locations of a host or network share for certain information within a file system. Adversaries may use the information from File and Directory Discovery during automated discovery to shape follow-on behaviors, including whether or not the adversary fully infects the target and/or attempts specific actions.\nMany command shell utilities can be used to obtain this information. Examples include dir, tree, ls, find, and locate. Custom tools may also be used to gather file and directory information and interact with the Native API. Adversaries may also leverage a Network Device CLI on network devices to gather file and directory information (e.g. dir, show flash, and/or nvram).\nSome files and directories may require elevated or specific user permissions to access.",
+              "signatures": [
+                {
+                  "severity": "LOW",
+                  "description": "Searches for sensitive browser data",
+                  "match_data": [
+                    "dekont20250805.exe searches for sensitive data of web browser \"Opera\" by file.",
+                    "dekont20250805.exe searches for sensitive data of web browser \"Brave\" by file.",
+                    "dekont20250805.exe searches for sensitive data of web browser \"Google Chrome\" by file.",
+                    "dekont20250805.exe searches for sensitive data of web browser \"Internet Explorer / Edge\" by file.",
+                    "dekont20250805.exe searches for sensitive data of web browser \"Mozilla Firefox\" by file.",
+                    "dekont20250805.exe searches for sensitive data of web browser \"BlackHawk\" by file.",
+                    "dekont20250805.exe searches for sensitive data of web browser \"Cyberfox\" by file.",
+                    "dekont20250805.exe searches for sensitive data of web browser \"k-Meleon\" by file.",
+                    "dekont20250805.exe searches for sensitive data of web browser \"Comodo IceDragon\" by file.",
+                    "dekont20250805.exe searches for sensitive data of web browser \"Flock\" by file."
+                  ]
+                },
+                {
+                  "severity": "INFO",
+                  "description": "Possibly does reconnaissance",
+                  "match_data": [
+                    "dekont20250805.exe tries to gather information about application \"Mozilla Firefox\" by file.",
+                    "dekont20250805.exe tries to gather information about application \"SeaMonkey\" by file.",
+                    "dekont20250805.exe tries to gather information about application \"blackHawk\" by file.",
+                    "dekont20250805.exe tries to gather information about application \"Cyberfox\" by file.",
+                    "dekont20250805.exe tries to gather information about application \"k-Meleon\" by file.",
+                    "dekont20250805.exe tries to gather information about application \"icecat\" by file.",
+                    "dekont20250805.exe tries to gather information about application \"Comodo IceDragon\" by file.",
+                    "dekont20250805.exe tries to gather information about application \"Postbox\" by file.",
+                    "dekont20250805.exe tries to gather information about application \"Flock\" by file.",
+                    "dekont20250805.exe tries to gather information about application \"The Bat!\" by file."
+                  ]
+                },
+                {
+                  "severity": "LOW",
+                  "description": "Reads sensitive browser data",
+                  "match_data": [
+                    "dekont20250805.exe tries to read sensitive data of web browser \"Internet Explorer / Edge\" by file."
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "TA0005",
+          "name": "Defense Evasion",
+          "link": "https://attack.mitre.org/tactics/TA0005/",
+          "description": "The adversary is trying to avoid being detected.\n\nDefense Evasion consists of techniques that adversaries use to avoid detection throughout their compromise. Techniques used for defense evasion include uninstalling/disabling security software or obfuscating/encrypting data and scripts. Adversaries also leverage and abuse trusted processes to hide and masquerade their malware. Other tactics\u2019 techniques are cross-listed here when those techniques include the added benefit of subverting defenses. ",
+          "techniques": [
+            {
+              "id": "T1027",
+              "name": "Obfuscated Files or Information",
+              "link": "https://attack.mitre.org/techniques/T1027/",
+              "description": "Adversaries may attempt to make an executable or file difficult to discover or analyze by encrypting, encoding, or otherwise obfuscating its contents on the system or in transit. This is common behavior that can be used across different platforms and the network to evade defenses. \nPayloads may be compressed, archived, or encrypted in order to avoid detection. These payloads may be used during Initial Access or later to mitigate detection. Sometimes a user's action may be required to open and Deobfuscate/Decode Files or Information for User Execution. The user may also be required to input a password to open a password protected compressed/encrypted file that was provided by the adversary.  Adversaries may also use compressed or archived scripts, such as JavaScript. \nPortions of files can also be encoded to hide the plain-text strings that would otherwise help defenders with discovery.  Payloads may also be split into separate, seemingly benign files that only reveal malicious functionality when reassembled. \nAdversaries may also abuse Command Obfuscation to obscure commands executed from payloads or directly via Command and Scripting Interpreter. Environment variables, aliases, characters, and other platform/language specific semantics can be used to evade signature based detections and application control mechanisms.   "
+            },
+            {
+              "id": "T1027.002",
+              "name": "Software Packing",
+              "link": "https://attack.mitre.org/techniques/T1027/002/",
+              "description": "Adversaries may perform software packing or virtual machine software protection to conceal their code. Software packing is a method of compressing or encrypting an executable. Packing an executable changes the file signature in an attempt to avoid signature-based detection. Most decompression techniques decompress the executable code in memory. Virtual machine software protection translates an executable's original code into a special format that only a special virtual machine can run. A virtual machine is then called to run this code. \nUtilities used to perform software packing are called packers. Example packers are MPRESS and UPX. A more comprehensive list of known packers is available, but adversaries may create their own packing techniques that do not leave the same artifacts as well-known packers to evade defenses.  ",
+              "signatures": [
+                {
+                  "severity": "INFO",
+                  "description": "Creates a page with write and execute permissions",
+                  "match_data": [
+                    "dekont20250805.exe allocates a page in a foreign process with \"PAGE_EXECUTE_READWRITE\" permissions, often used to dynamically unpack code."
+                  ]
+                },
+                {
+                  "severity": "INFO",
+                  "description": "Resolves API functions dynamically",
+                  "match_data": [
+                    "dekont20250805.exe resolves 51 API functions by name."
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "T1055",
+              "name": "Process Injection",
+              "link": "https://attack.mitre.org/techniques/T1055/",
+              "description": "Adversaries may inject code into processes in order to evade process-based defenses as well as possibly elevate privileges. Process injection is a method of executing arbitrary code in the address space of a separate live process. Running code in the context of another process may allow access to the process's memory, system/network resources, and possibly elevated privileges. Execution via process injection may also evade detection from security products since the execution is masked under a legitimate process. \nThere are many different ways to inject code into a process, many of which abuse legitimate functionalities. These implementations exist for every major OS but are typically platform specific. \nMore sophisticated samples may perform multiple process injections to segment modules and further evade detection, utilizing named pipes or other inter-process communication (IPC) mechanisms as a communication channel. ",
+              "signatures": [
+                {
+                  "severity": "LOW",
+                  "description": "Modifies control flow of a process started from a created or modified executable",
+                  "match_data": [
+                    "dekont20250805.exe alters context of (process #4) dekont20250805.exe."
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "T1055.012",
+              "name": "Process Hollowing",
+              "link": "https://attack.mitre.org/techniques/T1055/012/",
+              "description": "Adversaries may inject malicious code into suspended and hollowed processes in order to evade process-based defenses. Process hollowing is a method of executing arbitrary code in the address space of a separate live process.  \nProcess hollowing is commonly performed by creating a process in a suspended state then unmapping/hollowing its memory, which can then be replaced with malicious code. A victim process can be created with native Windows API calls such as CreateProcess, which includes a flag to suspend the processes primary thread. At this point the process can be unmapped using APIs calls such as ZwUnmapViewOfSection or NtUnmapViewOfSection  before being written to, realigned to the injected code, and resumed via VirtualAllocEx, WriteProcessMemory, SetThreadContext, then ResumeThread respectively.\nThis is very similar to Thread Local Storage but creates a new process rather than targeting an existing process. This behavior will likely not result in elevated privileges since the injected process was spawned from (and thus inherits the security context) of the injecting process. However, execution via process hollowing may also evade detection from security products since the execution is masked under a legitimate process. ",
+              "signatures": [
+                {
+                  "severity": "HIGH",
+                  "description": "Process Hollowing",
+                  "match_data": [
+                    "dekont20250805.exe hollows (process #4) dekont20250805.exe."
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "T1134",
+              "name": "Access Token Manipulation",
+              "link": "https://attack.mitre.org/techniques/T1134/",
+              "description": "Adversaries may modify access tokens to operate under a different user or system security context to perform actions and bypass access controls. Windows uses access tokens to determine the ownership of a running process. A user can manipulate access tokens to make a running process appear as though it is the child of a different process or belongs to someone other than the user that started the process. When this occurs, the process also takes on the security context associated with the new token.\nAn adversary can use built-in Windows API functions to copy access tokens from existing processes; this is known as token stealing. These token can then be applied to an existing process (i.e. Token Impersonation/Theft) or used to spawn a new process (i.e. Create Process with Token). An adversary must already be in a privileged user context (i.e. administrator) to steal a token. However, adversaries commonly use token stealing to elevate their security context from the administrator level to the SYSTEM level. An adversary can then use a token to authenticate to a remote system as the account for that token if the account has appropriate permissions on the remote system.\nAny standard user can use the runas command, and the Windows API functions, to create impersonation tokens; it does not require access to an administrator account. There are also other mechanisms, such as Active Directory fields, that can be used to modify access tokens.",
+              "signatures": [
+                {
+                  "severity": "INFO",
+                  "description": "Enables process privileges",
+                  "match_data": [
+                    "dekont20250805.exe enables process privilege \"SeDebugPrivilege\"."
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "T1562",
+              "name": "Impair Defenses",
+              "link": "https://attack.mitre.org/techniques/T1562/",
+              "description": "Adversaries may maliciously modify components of a victim environment in order to hinder or disable defensive mechanisms. This not only involves impairing preventative defenses, such as firewalls and anti-virus, but also detection capabilities that defenders can use to audit activity and identify malicious behavior. This may also span both native defenses as well as supplemental capabilities installed by users and administrators.\nAdversaries may also impair routine operations that contribute to defensive hygiene, such as blocking users from logging out, preventing a system from shutting down, or disabling or modifying the update process. Adversaries could also target event aggregation and analysis mechanisms, or otherwise disrupt these procedures by altering other system components. These restrictions can further enable malicious operations as well as the continued propagation of incidents."
+            },
+            {
+              "id": "T1562.001",
+              "name": "Disable or Modify Tools",
+              "link": "https://attack.mitre.org/techniques/T1562/001/",
+              "description": "Adversaries may modify and/or disable security tools to avoid possible detection of their malware/tools and activities. This may take many forms, such as killing security software processes or services, modifying / deleting Registry keys or configuration files so that tools do not operate properly, or other methods to interfere with security tools scanning or reporting information. Adversaries may also disable updates to prevent the latest security patches from reaching tools on victim systems.\nAdversaries may also tamper with artifacts deployed and utilized by security tools. Security tools may make dynamic changes to system components in order to maintain visibility into specific events. For example, security products may load their own modules and/or modify those loaded by processes to facilitate data collection. Similar to Indicator Blocking, adversaries may unhook or otherwise modify these features added by tools (especially those that exist in userland or are otherwise potentially accessible to adversaries) to avoid detection. Alternatively, they may add new directories to an endpoint detection and response (EDR) tool\u2019s exclusion list, enabling them to hide malicious files via File/Path Exclusions.\nAdversaries may also focus on specific applications such as Sysmon. For example, the \u201cStart\u201d and \u201cEnable\u201d values in HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\WMI\\Autologger\\EventLog-Microsoft-Windows-Sysmon-Operational may be modified to tamper with and potentially disable Sysmon logging. \nOn network devices, adversaries may attempt to skip digital signature verification checks by altering startup configuration files and effectively disabling firmware verification that typically occurs at boot.\nIn cloud environments, tools disabled by adversaries may include cloud monitoring agents that report back to services such as AWS CloudWatch or Google Cloud Monitor.\nFurthermore, although defensive tools may have anti-tampering mechanisms, adversaries may abuse tools such as legitimate rootkit removal kits to impair and/or disable these tools. For example, adversaries have used tools such as GMER to find and shut down hidden processes and antivirus software on infected systems.\nAdditionally, adversaries may exploit legitimate drivers from anti-virus software to gain access to kernel space (i.e. Exploitation for Privilege Escalation), which may lead to bypassing anti-tampering features.",
+              "signatures": [
+                {
+                  "severity": "HIGH",
+                  "description": "Modifies Windows Defender configuration",
+                  "match_data": [
+                    "dekont20250805.exe uses  powershell.exe to add \"C:\\Users\\RDhJ0CNFevzX\\Desktop\\Dekont20250805.exe\" to Windows Defender exclusions."
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "T1564",
+              "name": "Hide Artifacts",
+              "link": "https://attack.mitre.org/techniques/T1564/",
+              "description": "Adversaries may attempt to hide artifacts associated with their behaviors to evade detection. Operating systems may have features to hide various artifacts, such as important system files and administrative task execution, to avoid disrupting user work environments and prevent users from changing files or features on the system. Adversaries may abuse these features to hide artifacts such as files, directories, user accounts, or other system activity to evade detection.\nAdversaries may also attempt to hide artifacts associated with malicious behavior by creating computing regions that are isolated from common security instrumentation, such as through the use of virtualization technology."
+            },
+            {
+              "id": "T1564.003",
+              "name": "Hidden Window",
+              "link": "https://attack.mitre.org/techniques/T1564/003/",
+              "description": "Adversaries may use hidden windows to conceal malicious activity from the plain sight of users. In some cases, windows that would typically be displayed when an application carries out an operation can be hidden. This may be utilized by system administrators to avoid disrupting user work environments when carrying out administrative tasks. \nAdversaries may abuse these functionalities to hide otherwise visible windows from users so as not to alert the user to adversary activity on the system.\nOn macOS, the configurations for how applications run are listed in property list (plist) files. One of the tags in these files can be apple.awt.UIElement, which allows for Java applications to prevent the application's icon from appearing in the Dock. A common use for this is when applications run in the system tray, but don't also want to show up in the Dock.\nSimilarly, on Windows there are a variety of features in scripting languages, such as PowerShell, Jscript, and Visual Basic to make windows hidden. One example of this is powershell.exe -WindowStyle Hidden.\nThe Windows Registry can also be edited to hide application windows from the current user. For example, by setting the WindowPosition subkey in the HKEY_CURRENT_USER\\Console\\%SystemRoot%_System32_WindowsPowerShell_v1.0_PowerShell.exe Registry key to a maximum value, PowerShell windows will open off screen and be hidden.\nIn addition, Windows supports the CreateDesktop() API that can create a hidden desktop window with its own corresponding explorer.exe process.  All applications running on the hidden desktop window, such as a hidden VNC (hVNC) session, will be invisible to other desktops windows.",
+              "signatures": [
+                {
+                  "severity": "INFO",
+                  "description": "Creates process with hidden window",
+                  "match_data": [
+                    "dekont20250805.exe starts (process #2) powershell.exe with a hidden window.",
+                    "dekont20250805.exe starts (process #4) dekont20250805.exe with a hidden window."
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "TA0002",
+          "name": "Execution",
+          "link": "https://attack.mitre.org/tactics/TA0002/",
+          "description": "The adversary is trying to run malicious code.\n\nExecution consists of techniques that result in adversary-controlled code running on a local or remote system. Techniques that run malicious code are often paired with techniques from all other tactics to achieve broader goals, like exploring a network or stealing data. For example, an adversary might use a remote access tool to run a PowerShell script that does Remote System Discovery. ",
+          "techniques": [
+            {
+              "id": "T1047",
+              "name": "Windows Management Instrumentation",
+              "link": "https://attack.mitre.org/techniques/T1047/",
+              "description": "Adversaries may abuse Windows Management Instrumentation (WMI) to execute malicious commands and payloads. WMI is designed for programmers and is the infrastructure for management data and operations on Windows systems. WMI is an administration feature that provides a uniform environment to access Windows system components.\nThe WMI service enables both local and remote access, though the latter is facilitated by Remote Services such as Distributed Component Object Model and Windows Remote Management. Remote WMI over DCOM operates using port 135, whereas WMI over WinRM operates over port 5985 when using HTTP and 5986 for HTTPS. \nAn adversary can use WMI to interact with local and remote systems and use it as a means to execute various behaviors, such as gathering information for Discovery as well as Execution of commands and payloads. For example, wmic.exe can be abused by an adversary to delete shadow copies with the command wmic.exe Shadowcopy Delete (i.e., Inhibit System Recovery).\nNote: wmic.exe is deprecated as of January of 2024, with the WMIC feature being \u201cdisabled by default\u201d on Windows 11+. WMIC will be removed from subsequent Windows releases and replaced by PowerShell as the primary WMI interface. In addition to PowerShell and tools like wbemtool.exe, COM APIs can also be used to programmatically interact with WMI via C++, .NET, VBScript, etc.",
+              "signatures": [
+                {
+                  "severity": "LOW",
+                  "description": "Queries OS version via WMI",
+                  "match_data": [
+                    "dekont20250805.exe queries OS version via WMI query: select * from Win32_OperatingSystem."
+                  ]
+                },
+                {
+                  "severity": "LOW",
+                  "description": "Collects hardware properties",
+                  "match_data": [
+                    "dekont20250805.exe queries hardware properties via WMI: SELECT * FROM Win32_Processor."
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "TA0004",
+          "name": "Privilege Escalation",
+          "link": "https://attack.mitre.org/tactics/TA0004/",
+          "description": "The adversary is trying to gain higher-level permissions.\n\nPrivilege Escalation consists of techniques that adversaries use to gain higher-level permissions on a system or network. Adversaries can often enter and explore a network with unprivileged access but require elevated permissions to follow through on their objectives. Common approaches are to take advantage of system weaknesses, misconfigurations, and vulnerabilities. Examples of elevated access include: \n\n* SYSTEM/root level\n* local administrator\n* user account with admin-like access \n* user accounts with access to specific system or perform specific function\n\nThese techniques often overlap with Persistence techniques, as OS features that let an adversary persist can execute in an elevated context.  ",
+          "techniques": [
+            {
+              "id": "T1055",
+              "name": "Process Injection",
+              "link": "https://attack.mitre.org/techniques/T1055/",
+              "description": "Adversaries may inject code into processes in order to evade process-based defenses as well as possibly elevate privileges. Process injection is a method of executing arbitrary code in the address space of a separate live process. Running code in the context of another process may allow access to the process's memory, system/network resources, and possibly elevated privileges. Execution via process injection may also evade detection from security products since the execution is masked under a legitimate process. \nThere are many different ways to inject code into a process, many of which abuse legitimate functionalities. These implementations exist for every major OS but are typically platform specific. \nMore sophisticated samples may perform multiple process injections to segment modules and further evade detection, utilizing named pipes or other inter-process communication (IPC) mechanisms as a communication channel. ",
+              "signatures": [
+                {
+                  "severity": "LOW",
+                  "description": "Modifies control flow of a process started from a created or modified executable",
+                  "match_data": [
+                    "dekont20250805.exe alters context of (process #4) dekont20250805.exe."
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "T1055.012",
+              "name": "Process Hollowing",
+              "link": "https://attack.mitre.org/techniques/T1055/012/",
+              "description": "Adversaries may inject malicious code into suspended and hollowed processes in order to evade process-based defenses. Process hollowing is a method of executing arbitrary code in the address space of a separate live process.  \nProcess hollowing is commonly performed by creating a process in a suspended state then unmapping/hollowing its memory, which can then be replaced with malicious code. A victim process can be created with native Windows API calls such as CreateProcess, which includes a flag to suspend the processes primary thread. At this point the process can be unmapped using APIs calls such as ZwUnmapViewOfSection or NtUnmapViewOfSection  before being written to, realigned to the injected code, and resumed via VirtualAllocEx, WriteProcessMemory, SetThreadContext, then ResumeThread respectively.\nThis is very similar to Thread Local Storage but creates a new process rather than targeting an existing process. This behavior will likely not result in elevated privileges since the injected process was spawned from (and thus inherits the security context) of the injecting process. However, execution via process hollowing may also evade detection from security products since the execution is masked under a legitimate process. ",
+              "signatures": [
+                {
+                  "severity": "HIGH",
+                  "description": "Process Hollowing",
+                  "match_data": [
+                    "dekont20250805.exe hollows (process #4) dekont20250805.exe."
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "T1134",
+              "name": "Access Token Manipulation",
+              "link": "https://attack.mitre.org/techniques/T1134/",
+              "description": "Adversaries may modify access tokens to operate under a different user or system security context to perform actions and bypass access controls. Windows uses access tokens to determine the ownership of a running process. A user can manipulate access tokens to make a running process appear as though it is the child of a different process or belongs to someone other than the user that started the process. When this occurs, the process also takes on the security context associated with the new token.\nAn adversary can use built-in Windows API functions to copy access tokens from existing processes; this is known as token stealing. These token can then be applied to an existing process (i.e. Token Impersonation/Theft) or used to spawn a new process (i.e. Create Process with Token). An adversary must already be in a privileged user context (i.e. administrator) to steal a token. However, adversaries commonly use token stealing to elevate their security context from the administrator level to the SYSTEM level. An adversary can then use a token to authenticate to a remote system as the account for that token if the account has appropriate permissions on the remote system.\nAny standard user can use the runas command, and the Windows API functions, to create impersonation tokens; it does not require access to an administrator account. There are also other mechanisms, such as Active Directory fields, that can be used to modify access tokens.",
+              "signatures": [
+                {
+                  "severity": "INFO",
+                  "description": "Enables process privileges",
+                  "match_data": [
+                    "dekont20250805.exe enables process privilege \"SeDebugPrivilege\"."
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "TA0011",
+          "name": "Command and Control",
+          "link": "https://attack.mitre.org/tactics/TA0011/",
+          "description": "The adversary is trying to communicate with compromised systems to control them.\n\nCommand and Control consists of techniques that adversaries may use to communicate with systems under their control within a victim network. Adversaries commonly attempt to mimic normal, expected traffic to avoid detection. There are many ways an adversary can establish command and control with various levels of stealth depending on the victim\u2019s network structure and defenses.",
+          "techniques": [
+            {
+              "id": "T1071",
+              "name": "Application Layer Protocol",
+              "link": "https://attack.mitre.org/techniques/T1071/",
+              "description": "Adversaries may communicate using OSI application layer protocols to avoid detection/network filtering by blending in with existing traffic. Commands to the remote system, and often the results of those commands, will be embedded within the protocol traffic between the client and server. \nAdversaries may utilize many different protocols, including those used for web browsing, transferring files, electronic mail, DNS, or publishing/subscribing. For connections that occur internally within an enclave (such as those between a proxy or pivot node and other nodes), commonly used protocols are SMB, SSH, or RDP. "
+            },
+            {
+              "id": "T1071.004",
+              "name": "DNS",
+              "link": "https://attack.mitre.org/techniques/T1071/004/",
+              "description": "Adversaries may communicate using the Domain Name System (DNS) application layer protocol to avoid detection/network filtering by blending in with existing traffic. Commands to the remote system, and often the results of those commands, will be embedded within the protocol traffic between the client and server. \nThe DNS protocol serves an administrative function in computer networking and thus may be very common in environments. DNS traffic may also be allowed even before network authentication is completed. DNS packets contain many fields and headers in which data can be concealed. Often known as DNS tunneling, adversaries may abuse DNS to communicate with systems under their control within a victim network while also mimicking normal, expected traffic. ",
+              "signatures": [
+                {
+                  "severity": "INFO",
+                  "description": "Performs DNS request",
+                  "match_data": [
+                    "dekont20250805.exe resolves hostname \"mail.munuroto.com\" to IP \"109.232.216.229\"."
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "T1095",
+              "name": "Non-Application Layer Protocol",
+              "link": "https://attack.mitre.org/techniques/T1095/",
+              "description": "Adversaries may use an OSI non-application layer protocol for communication between host and C2 server or among infected hosts within a network. The list of possible protocols is extensive. Specific examples include use of network layer protocols, such as the Internet Control Message Protocol (ICMP), transport layer protocols, such as the User Datagram Protocol (UDP), session layer protocols, such as Socket Secure (SOCKS), as well as redirected/tunneled protocols, such as Serial over LAN (SOL).\nICMP communication between hosts is one example. Because ICMP is part of the Internet Protocol Suite, it is required to be implemented by all IP-compatible hosts. However, it is not as commonly monitored as other Internet Protocols such as TCP or UDP and may be used by adversaries to hide communications.\nIn ESXi environments, adversaries may leverage the Virtual Machine Communication Interface (VMCI) for communication between guest virtual machines and the ESXi host. This traffic is similar to client-server communications on traditional network sockets but is localized to the physical machine running the ESXi host, meaning it does not traverse external networks (routers, switches). This results in communications that are invisible to external monitoring and standard networking tools like tcpdump, netstat, nmap, and Wireshark. By adding a VMCI backdoor to a compromised ESXi host, adversaries may persistently regain access from any guest VM to the compromised ESXi host\u2019s backdoor, regardless of network segmentation or firewall rules in place.",
+              "signatures": [
+                {
+                  "severity": "INFO",
+                  "description": "Connects to remote host",
+                  "match_data": [
+                    "dekont20250805.exe opens an outgoing TCP connection to host \"109.232.216.229:587\"."
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "TA0006",
+          "name": "Credential Access",
+          "link": "https://attack.mitre.org/tactics/TA0006/",
+          "description": "The adversary is trying to steal account names and passwords.\n\nCredential Access consists of techniques for stealing credentials like account names and passwords. Techniques used to get credentials include keylogging or credential dumping. Using legitimate credentials can give adversaries access to systems, make them harder to detect, and provide the opportunity to create more accounts to help achieve their goals.",
+          "techniques": [
+            {
+              "id": "T1552",
+              "name": "Unsecured Credentials",
+              "link": "https://attack.mitre.org/techniques/T1552/",
+              "description": "Adversaries may search compromised systems to find and obtain insecurely stored credentials. These credentials can be stored and/or misplaced in many locations on a system, including plaintext files (e.g. Bash History), operating system or application-specific repositories (e.g. Credentials in Registry),  or other specialized files/artifacts (e.g. Private Keys)."
+            },
+            {
+              "id": "T1552.001",
+              "name": "Credentials In Files",
+              "link": "https://attack.mitre.org/techniques/T1552/001/",
+              "description": "Adversaries may search local file systems and remote file shares for files containing insecurely stored credentials. These can be files created by users to store their own credentials, shared credential stores for a group of individuals, configuration files containing passwords for a system or service, or source code/binary files containing embedded passwords.\nIt is possible to extract passwords from backups or saved virtual machines through OS Credential Dumping. Passwords may also be obtained from Group Policy Preferences stored on the Windows Domain Controller.\nIn cloud and/or containerized environments, authenticated user and service account credentials are often stored in local configuration and credential files. They may also be found as parameters to deployment commands in container logs. In some cases, these files can be copied and reused on another machine or the contents can be read and then used to authenticate without needing to copy any files.",
+              "signatures": [
+                {
+                  "severity": "LOW",
+                  "description": "Searches for sensitive browser data",
+                  "match_data": [
+                    "dekont20250805.exe searches for sensitive data of web browser \"Opera\" by file.",
+                    "dekont20250805.exe searches for sensitive data of web browser \"Brave\" by file.",
+                    "dekont20250805.exe searches for sensitive data of web browser \"Google Chrome\" by file.",
+                    "dekont20250805.exe searches for sensitive data of web browser \"Internet Explorer / Edge\" by file.",
+                    "dekont20250805.exe searches for sensitive data of web browser \"Mozilla Firefox\" by file.",
+                    "dekont20250805.exe searches for sensitive data of web browser \"BlackHawk\" by file.",
+                    "dekont20250805.exe searches for sensitive data of web browser \"Cyberfox\" by file.",
+                    "dekont20250805.exe searches for sensitive data of web browser \"k-Meleon\" by file.",
+                    "dekont20250805.exe searches for sensitive data of web browser \"Comodo IceDragon\" by file.",
+                    "dekont20250805.exe searches for sensitive data of web browser \"Flock\" by file."
+                  ]
+                },
+                {
+                  "severity": "LOW",
+                  "description": "Reads sensitive browser data",
+                  "match_data": [
+                    "dekont20250805.exe tries to read sensitive data of web browser \"Internet Explorer / Edge\" by file."
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "T1552.002",
+              "name": "Credentials in Registry",
+              "link": "https://attack.mitre.org/techniques/T1552/002/",
+              "description": "Adversaries may search the Registry on compromised systems for insecurely stored credentials. The Windows Registry stores configuration information that can be used by the system or other programs. Adversaries may query the Registry looking for credentials and passwords that have been stored for use by other programs or services. Sometimes these credentials are used for automatic logons.\nExample commands to find Registry keys related to password information: \n\nLocal Machine Hive: reg query HKLM /f password /t REG_SZ /s\nCurrent User Hive: reg query HKCU /f password /t REG_SZ /s\n",
+              "signatures": [
+                {
+                  "severity": "LOW",
+                  "description": "Searches for sensitive mail data",
+                  "match_data": [
+                    "dekont20250805.exe tries to access sensitive data of mail application \"Microsoft Outlook\" by registry.",
+                    "dekont20250805.exe tries to access sensitive data of mail application \"IncrediMail\" by registry."
+                  ]
+                },
+                {
+                  "severity": "LOW",
+                  "description": "Reads sensitive mail data",
+                  "match_data": [
+                    "dekont20250805.exe tries to read sensitive data of mail application \"Microsoft Outlook\" by registry."
+                  ]
+                },
+                {
+                  "severity": "LOW",
+                  "description": "Searches for sensitive application data",
+                  "match_data": [
+                    "dekont20250805.exe tries to access sensitive data of application \"WinSCP\" by registry.",
+                    "dekont20250805.exe tries to access sensitive data of application \"OpenVPN\" by registry.",
+                    "dekont20250805.exe tries to access sensitive data of application \"RealVNC\" by registry.",
+                    "dekont20250805.exe tries to access sensitive data of application \"TightVNC\" by registry.",
+                    "dekont20250805.exe tries to access sensitive data of application \"TigerVNC\" by registry."
+                  ]
+                },
+                {
+                  "severity": "LOW",
+                  "description": "Searches for sensitive FTP data",
+                  "match_data": [
+                    "dekont20250805.exe tries to access sensitive data of FTP application \"CoreFTP\" by registry."
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "T1555",
+              "name": "Credentials from Password Stores",
+              "link": "https://attack.mitre.org/techniques/T1555/",
+              "description": "Adversaries may search for common password storage locations to obtain user credentials. Passwords are stored in several places on a system, depending on the operating system or application holding the credentials. There are also specific applications and services that store passwords to make them easier for users to manage and maintain, such as password managers and cloud secrets vaults. Once credentials are obtained, they can be used to perform lateral movement and access restricted information."
+            },
+            {
+              "id": "T1555.003",
+              "name": "Credentials from Web Browsers",
+              "link": "https://attack.mitre.org/techniques/T1555/003/",
+              "description": "Adversaries may acquire credentials from web browsers by reading files specific to the target browser. Web browsers commonly save credentials such as website usernames and passwords so that they do not need to be entered manually in the future. Web browsers typically store the credentials in an encrypted format within a credential store; however, methods exist to extract plaintext credentials from web browsers.\nFor example, on Windows systems, encrypted credentials may be obtained from Google Chrome by reading a database file, AppData\\Local\\Google\\Chrome\\User Data\\Default\\Login Data and executing a SQL query: SELECT action_url, username_value, password_value FROM logins;. The plaintext password can then be obtained by passing the encrypted credentials to the Windows API function CryptUnprotectData, which uses the victim\u2019s cached logon credentials as the decryption key.\nAdversaries have executed similar procedures for common web browsers such as FireFox, Safari, Edge, etc. Windows stores Internet Explorer and Microsoft Edge credentials in Credential Lockers managed by the Windows Credential Manager.\nAdversaries may also acquire credentials by searching web browser process memory for patterns that commonly match credentials.\nAfter acquiring credentials from web browsers, adversaries may attempt to recycle the credentials across different systems and/or accounts in order to expand access. This can result in significantly furthering an adversary's objective in cases where credentials gained from web browsers overlap with privileged accounts (e.g. domain administrator).",
+              "signatures": [
+                {
+                  "severity": "LOW",
+                  "description": "Reads sensitive browser data",
+                  "match_data": [
+                    "dekont20250805.exe tries to read credentials of web browser \"Internet Explorer\" by reading from the system's credential vault."
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "Yomi Hunter": {
+      "tactics": [
+        {
+          "id": "TA0002",
+          "name": "Execution",
+          "link": "https://attack.mitre.org/tactics/TA0002/",
+          "description": "The adversary is trying to run malicious code.\n\nExecution consists of techniques that result in adversary-controlled code running on a local or remote system. Techniques that run malicious code are often paired with techniques from all other tactics to achieve broader goals, like exploring a network or stealing data. For example, an adversary might use a remote access tool to run a PowerShell script that does Remote System Discovery. ",
+          "techniques": [
+            {
+              "id": "T1129",
+              "name": "Shared Modules",
+              "link": "https://attack.mitre.org/techniques/T1129/",
+              "description": "Adversaries may execute malicious payloads via loading shared modules. Shared modules are executable files that are loaded into processes to provide access to reusable code, such as specific custom functions or invoking OS API functions (i.e., Native API).\nAdversaries may use this functionality as a way to execute arbitrary payloads on a victim system. For example, adversaries can modularize functionality of their malware into shared objects that perform various functions such as managing C2 network communications or execution of specific actions on objective.\nThe Linux & macOS module loader can load and execute shared objects from arbitrary local paths. This functionality resides in dlfcn.h in functions such as dlopen and dlsym. Although macOS can execute .so files, common practice uses .dylib files.\nThe Windows module loader can be instructed to load DLLs from arbitrary local paths and arbitrary Universal Naming Convention (UNC) network paths. This functionality resides in NTDLL.dll and is part of the Windows Native API which is called from functions like LoadLibrary at run time.",
+              "signatures": [
+                {
+                  "severity": "UNKNOWN",
+                  "description": "SetUnhandledExceptionFilter detected: superseding the top-level exception handler of each thread of a process is a common anti-debug technique."
+                },
+                {
+                  "severity": "UNKNOWN",
+                  "description": "The process attempted to dynamically load a malicious function"
+                },
+                {
+                  "severity": "UNKNOWN",
+                  "description": "The process tried to load dynamically one or more functions."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "TA0005",
+          "name": "Defense Evasion",
+          "link": "https://attack.mitre.org/tactics/TA0005/",
+          "description": "The adversary is trying to avoid being detected.\n\nDefense Evasion consists of techniques that adversaries use to avoid detection throughout their compromise. Techniques used for defense evasion include uninstalling/disabling security software or obfuscating/encrypting data and scripts. Adversaries also leverage and abuse trusted processes to hide and masquerade their malware. Other tactics\u2019 techniques are cross-listed here when those techniques include the added benefit of subverting defenses. ",
+          "techniques": [
+            {
+              "id": "T1027",
+              "name": "Obfuscated Files or Information",
+              "link": "https://attack.mitre.org/techniques/T1027/",
+              "description": "Adversaries may attempt to make an executable or file difficult to discover or analyze by encrypting, encoding, or otherwise obfuscating its contents on the system or in transit. This is common behavior that can be used across different platforms and the network to evade defenses. \nPayloads may be compressed, archived, or encrypted in order to avoid detection. These payloads may be used during Initial Access or later to mitigate detection. Sometimes a user's action may be required to open and Deobfuscate/Decode Files or Information for User Execution. The user may also be required to input a password to open a password protected compressed/encrypted file that was provided by the adversary.  Adversaries may also use compressed or archived scripts, such as JavaScript. \nPortions of files can also be encoded to hide the plain-text strings that would otherwise help defenders with discovery.  Payloads may also be split into separate, seemingly benign files that only reveal malicious functionality when reassembled. \nAdversaries may also abuse Command Obfuscation to obscure commands executed from payloads or directly via Command and Scripting Interpreter. Environment variables, aliases, characters, and other platform/language specific semantics can be used to evade signature based detections and application control mechanisms.   ",
+              "signatures": [
+                {
+                  "severity": "UNKNOWN",
+                  "description": "SetUnhandledExceptionFilter detected: superseding the top-level exception handler of each thread of a process is a common anti-debug technique."
+                }
+              ]
+            },
+            {
+              "id": "T1140",
+              "name": "Deobfuscate/Decode Files or Information",
+              "link": "https://attack.mitre.org/techniques/T1140/",
+              "description": "Adversaries may use Obfuscated Files or Information to hide artifacts of an intrusion from analysis. They may require separate mechanisms to decode or deobfuscate that information depending on how they intend to use it. Methods for doing that include built-in functionality of malware or by using utilities present on the system.\nOne such example is the use of certutil to decode a remote access tool portable executable file that has been hidden inside a certificate file. Another example is using the Windows copy /b or type command to reassemble binary fragments into a malicious payload.\nSometimes a user's action may be required to open it for deobfuscation or decryption as part of User Execution. The user may also be required to input a password to open a password protected compressed/encrypted file that was provided by the adversary.",
+              "signatures": [
+                {
+                  "severity": "UNKNOWN",
+                  "description": "Detected an attempt to pull out some data from the binary image"
+                }
+              ]
+            },
+            {
+              "id": "T1620",
+              "name": "Reflective Code Loading",
+              "link": "https://attack.mitre.org/techniques/T1620/",
+              "description": "Adversaries may reflectively load code into a process in order to conceal the execution of malicious payloads. Reflective loading involves allocating then executing payloads directly within the memory of the process, vice creating a thread or process backed by a file path on disk (e.g., Shared Modules).\nReflectively loaded payloads may be compiled binaries, anonymous files (only present in RAM), or just snubs of fileless executable code (ex: position-independent shellcode). For example, the Assembly.Load() method executed by PowerShell may be abused to load raw code into the running process.\nReflective code injection is very similar to Process Injection except that the \u201cinjection\u201d loads code into the processes\u2019 own memory instead of that of a separate process. Reflective loading may evade process-based detections since the execution of the arbitrary code may be masked within a legitimate or otherwise benign process. Reflectively loading payloads directly into memory may also avoid creating files or other artifacts on disk, while also enabling malware to keep these payloads encrypted (or otherwise obfuscated) until execution.",
+              "signatures": [
+                {
+                  "severity": "UNKNOWN",
+                  "description": "load .NET assembly"
+                }
+              ]
+            },
+            {
+              "id": "T1089",
+              "name": "Disabling Security Tools",
+              "link": "https://attack.mitre.org/techniques/T1089/",
+              "description": "Adversaries may disable security tools to avoid possible detection of their tools and activities. This can take the form of killing security software or event logging processes, deleting Registry keys so that tools do not start at run time, or other methods to interfere with security scanning or event reporting.",
+              "signatures": [
+                {
+                  "severity": "UNKNOWN",
+                  "description": "The process has tried to suspend a sandbox-related thread (possible sandbox evasion attempt)"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "TA0007",
+          "name": "Discovery",
+          "link": "https://attack.mitre.org/tactics/TA0007/",
+          "description": "The adversary is trying to figure out your environment.\n\nDiscovery consists of techniques an adversary may use to gain knowledge about the system and internal network. These techniques help adversaries observe the environment and orient themselves before deciding how to act. They also allow adversaries to explore what they can control and what\u2019s around their entry point in order to discover how it could benefit their current objective. Native operating system tools are often used toward this post-compromise information-gathering objective. ",
+          "techniques": [
+            {
+              "id": "T1057",
+              "name": "Process Discovery",
+              "link": "https://attack.mitre.org/techniques/T1057/",
+              "description": "Adversaries may attempt to get information about running processes on a system. Information obtained could be used to gain an understanding of common software/applications running on systems within the network. Administrator or otherwise elevated access may provide better process details. Adversaries may use the information from Process Discovery during automated discovery to shape follow-on behaviors, including whether or not the adversary fully infects the target and/or attempts specific actions.\nIn Windows environments, adversaries could obtain details on running processes using the Tasklist utility via cmd or Get-Process via PowerShell. Information about processes can also be extracted from the output of Native API calls such as CreateToolhelp32Snapshot. In Mac and Linux, this is accomplished with the ps command. Adversaries may also opt to enumerate processes via /proc. ESXi also supports use of the ps command, as well as esxcli system process list.\nOn network devices, Network Device CLI commands such as show processes can be used to display current running processes.",
+              "signatures": [
+                {
+                  "severity": "UNKNOWN",
+                  "description": "The process has tried to detect the debugger probing the use of page guards."
+                },
+                {
+                  "severity": "UNKNOWN",
+                  "description": "The process attempted to detect a running debugger using common APIs"
+                }
+              ]
+            },
+            {
+              "id": "T1083",
+              "name": "File and Directory Discovery",
+              "link": "https://attack.mitre.org/techniques/T1083/",
+              "description": "Adversaries may enumerate files and directories or may search in specific locations of a host or network share for certain information within a file system. Adversaries may use the information from File and Directory Discovery during automated discovery to shape follow-on behaviors, including whether or not the adversary fully infects the target and/or attempts specific actions.\nMany command shell utilities can be used to obtain this information. Examples include dir, tree, ls, find, and locate. Custom tools may also be used to gather file and directory information and interact with the Native API. Adversaries may also leverage a Network Device CLI on network devices to gather file and directory information (e.g. dir, show flash, and/or nvram).\nSome files and directories may require elevated or specific user permissions to access.",
+              "signatures": [
+                {
+                  "severity": "UNKNOWN",
+                  "description": "check if file exists"
+                },
+                {
+                  "severity": "UNKNOWN",
+                  "description": "check if directory exists"
+                },
+                {
+                  "severity": "UNKNOWN",
+                  "description": "get common file path"
+                },
+                {
+                  "severity": "UNKNOWN",
+                  "description": "get file size"
+                }
+              ]
+            },
+            {
+              "id": "T1082",
+              "name": "System Information Discovery",
+              "link": "https://attack.mitre.org/techniques/T1082/",
+              "description": "An adversary may attempt to get detailed information about the operating system and hardware, including version, patches, hotfixes, service packs, and architecture. Adversaries may use the information from System Information Discovery during automated discovery to shape follow-on behaviors, including whether or not the adversary fully infects the target and/or attempts specific actions.\nTools such as Systeminfo can be used to gather detailed system information. If running with privileged access, a breakdown of system data can be gathered through the systemsetup configuration tool on macOS. As an example, adversaries with user-level access can execute the df -aH command to obtain currently mounted disks and associated freely available space. Adversaries may also leverage a Network Device CLI on network devices to gather detailed system information (e.g. show version). On ESXi servers, threat actors may gather system information from various esxcli utilities, such as system hostname get, system version get, and storage filesystem list (to list storage volumes).\nInfrastructure as a Service (IaaS) cloud providers such as AWS, GCP, and Azure allow access to instance and virtual machine information via APIs. Successful authenticated API calls can return data such as the operating system platform and status of a particular instance or the model view of a virtual machine.\nSystem Information Discovery combined with information gathered from other forms of discovery and reconnaissance can drive payload development and concealment. ",
+              "signatures": [
+                {
+                  "severity": "UNKNOWN",
+                  "description": "Queries for the computername"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "links": {
+    "self": "https://www.virustotal.com/api/v3/files/8d472caf596f0d5c7a9d1fc2bfc371f55eca7016ffe249409da702227f60a0a2/behaviour_mitre_trees"
+  }
+}
