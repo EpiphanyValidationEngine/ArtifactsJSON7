@@ -1,0 +1,186 @@
+{
+  "data": {
+    "CAPA": {
+      "tactics": [
+        {
+          "id": "TA0002",
+          "name": "Execution",
+          "link": "https://attack.mitre.org/tactics/TA0002/",
+          "description": "The adversary is trying to run malicious code.\n\nExecution consists of techniques that result in adversary-controlled code running on a local or remote system. Techniques that run malicious code are often paired with techniques from all other tactics to achieve broader goals, like exploring a network or stealing data. For example, an adversary might use a remote access tool to run a PowerShell script that does Remote System Discovery. ",
+          "techniques": [
+            {
+              "id": "T1129",
+              "name": "Shared Modules",
+              "link": "https://attack.mitre.org/techniques/T1129/",
+              "description": "Adversaries may execute malicious payloads via loading shared modules. Shared modules are executable files that are loaded into processes to provide access to reusable code, such as specific custom functions or invoking OS API functions (i.e., Native API).\nAdversaries may use this functionality as a way to execute arbitrary payloads on a victim system. For example, adversaries can modularize functionality of their malware into shared objects that perform various functions such as managing C2 network communications or execution of specific actions on objective.\nThe Linux & macOS module loader can load and execute shared objects from arbitrary local paths. This functionality resides in dlfcn.h in functions such as dlopen and dlsym. Although macOS can execute .so files, common practice uses .dylib files.\nThe Windows module loader can be instructed to load DLLs from arbitrary local paths and arbitrary Universal Naming Convention (UNC) network paths. This functionality resides in NTDLL.dll and is part of the Windows Native API which is called from functions like LoadLibrary at run time.",
+              "signatures": [
+                {
+                  "severity": "INFO",
+                  "description": "link function at runtime on Windows",
+                  "match_data": [
+                    "api: GetProcAddress"
+                  ]
+                },
+                {
+                  "severity": "INFO",
+                  "description": "parse PE header"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "Yomi Hunter": {
+      "tactics": [
+        {
+          "id": "TA0002",
+          "name": "Execution",
+          "link": "https://attack.mitre.org/tactics/TA0002/",
+          "description": "The adversary is trying to run malicious code.\n\nExecution consists of techniques that result in adversary-controlled code running on a local or remote system. Techniques that run malicious code are often paired with techniques from all other tactics to achieve broader goals, like exploring a network or stealing data. For example, an adversary might use a remote access tool to run a PowerShell script that does Remote System Discovery. ",
+          "techniques": [
+            {
+              "id": "T1129",
+              "name": "Shared Modules",
+              "link": "https://attack.mitre.org/techniques/T1129/",
+              "description": "Adversaries may execute malicious payloads via loading shared modules. Shared modules are executable files that are loaded into processes to provide access to reusable code, such as specific custom functions or invoking OS API functions (i.e., Native API).\nAdversaries may use this functionality as a way to execute arbitrary payloads on a victim system. For example, adversaries can modularize functionality of their malware into shared objects that perform various functions such as managing C2 network communications or execution of specific actions on objective.\nThe Linux & macOS module loader can load and execute shared objects from arbitrary local paths. This functionality resides in dlfcn.h in functions such as dlopen and dlsym. Although macOS can execute .so files, common practice uses .dylib files.\nThe Windows module loader can be instructed to load DLLs from arbitrary local paths and arbitrary Universal Naming Convention (UNC) network paths. This functionality resides in NTDLL.dll and is part of the Windows Native API which is called from functions like LoadLibrary at run time.",
+              "signatures": [
+                {
+                  "severity": "UNKNOWN",
+                  "description": "The process attempted to dynamically load a malicious function"
+                },
+                {
+                  "severity": "UNKNOWN",
+                  "description": "The process tried to load dynamically one or more functions."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "TA0003",
+          "name": "Persistence",
+          "link": "https://attack.mitre.org/tactics/TA0003/",
+          "description": "The adversary is trying to maintain their foothold.\n\nPersistence consists of techniques that adversaries use to keep access to systems across restarts, changed credentials, and other interruptions that could cut off their access. Techniques used for persistence include any access, action, or configuration changes that let them maintain their foothold on systems, such as replacing or hijacking legitimate code or adding startup code. ",
+          "techniques": [
+            {
+              "id": "T1198",
+              "name": "SIP and Trust Provider Hijacking",
+              "link": "https://attack.mitre.org/techniques/T1198/",
+              "description": "In user mode, Windows Authenticode  digital signatures are used to verify a file's origin and integrity, variables that may be used to establish trust in signed code (ex: a driver with a valid Microsoft signature may be handled as safe). The signature validation process is handled via the WinVerifyTrust application programming interface (API) function,   which accepts an inquiry and coordinates with the appropriate trust provider, which is responsible for validating parameters of a signature. \nBecause of the varying executable file types and corresponding signature formats, Microsoft created software components called Subject Interface Packages (SIPs)  to provide a layer of abstraction between API functions and files. SIPs are responsible for enabling API functions to create, retrieve, calculate, and verify signatures. Unique SIPs exist for most file formats (Executable, PowerShell, Installer, etc., with catalog signing providing a catch-all  ) and are identified by globally unique identifiers (GUIDs). \nSimilar to Code Signing, adversaries may abuse this architecture to subvert trust controls and bypass security policies that allow only legitimately signed code to execute on a system. Adversaries may hijack SIP and trust provider components to mislead operating system and whitelisting tools to classify malicious (or any) code as signed by: \n\nModifying the Dll and FuncName Registry values in HKLM\\SOFTWARE[\\WOW6432Node]Microsoft\\Cryptography\\OID\\EncodingType 0\\CryptSIPDllGetSignedDataMsg{SIP_GUID} that point to the dynamic link library (DLL) providing a SIP\u2019s CryptSIPDllGetSignedDataMsg function, which retrieves an encoded digital certificate from a signed file. By pointing to a maliciously-crafted DLL with an exported function that always returns a known good signature value (ex: a Microsoft signature for Portable Executables) rather than the file\u2019s real signature, an adversary can apply an acceptable signature value to all files using that SIP  (although a hash mismatch will likely occur, invalidating the signature, since the hash returned by the function will not match the value computed from the file).\nModifying the Dll and FuncName Registry values in HKLM\\SOFTWARE[WOW6432Node]Microsoft\\Cryptography\\OID\\EncodingType 0\\CryptSIPDllVerifyIndirectData{SIP_GUID} that point to the DLL providing a SIP\u2019s CryptSIPDllVerifyIndirectData function, which validates a file\u2019s computed hash against the signed hash value. By pointing to a maliciously-crafted DLL with an exported function that always returns TRUE (indicating that the validation was successful), an adversary can successfully validate any file (with a legitimate signature) using that SIP  (with or without hijacking the previously mentioned CryptSIPDllGetSignedDataMsg function). This Registry value could also be redirected to a suitable exported function from an already present DLL, avoiding the requirement to drop and execute a new file on disk.\nModifying the DLL and Function Registry values in HKLM\\SOFTWARE[WOW6432Node]Microsoft\\Cryptography\\Providers\\Trust\\FinalPolicy{trust provider GUID} that point to the DLL providing a trust provider\u2019s FinalPolicy function, which is where the decoded and parsed signature is checked and the majority of trust decisions are made. Similar to hijacking SIP\u2019s CryptSIPDllVerifyIndirectData function, this value can be redirected to a suitable exported function from an already present DLL or a maliciously-crafted DLL (though the implementation of a trust provider is complex).\nNote: The above hijacks are also possible without modifying the Registry via DLL Search Order Hijacking.\n\nHijacking SIP or trust provider components can also enable persistent code execution, since these malicious components may be invoked by any application that performs code signing or signature validation. ",
+              "signatures": [
+                {
+                  "severity": "UNKNOWN",
+                  "description": "The binary has an Authenticode signature"
+                },
+                {
+                  "severity": "UNKNOWN",
+                  "description": "The file have a Trusted Certificate"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "TA0005",
+          "name": "Defense Evasion",
+          "link": "https://attack.mitre.org/tactics/TA0005/",
+          "description": "The adversary is trying to avoid being detected.\n\nDefense Evasion consists of techniques that adversaries use to avoid detection throughout their compromise. Techniques used for defense evasion include uninstalling/disabling security software or obfuscating/encrypting data and scripts. Adversaries also leverage and abuse trusted processes to hide and masquerade their malware. Other tactics\u2019 techniques are cross-listed here when those techniques include the added benefit of subverting defenses. ",
+          "techniques": [
+            {
+              "id": "T1198",
+              "name": "SIP and Trust Provider Hijacking",
+              "link": "https://attack.mitre.org/techniques/T1198/",
+              "description": "In user mode, Windows Authenticode  digital signatures are used to verify a file's origin and integrity, variables that may be used to establish trust in signed code (ex: a driver with a valid Microsoft signature may be handled as safe). The signature validation process is handled via the WinVerifyTrust application programming interface (API) function,   which accepts an inquiry and coordinates with the appropriate trust provider, which is responsible for validating parameters of a signature. \nBecause of the varying executable file types and corresponding signature formats, Microsoft created software components called Subject Interface Packages (SIPs)  to provide a layer of abstraction between API functions and files. SIPs are responsible for enabling API functions to create, retrieve, calculate, and verify signatures. Unique SIPs exist for most file formats (Executable, PowerShell, Installer, etc., with catalog signing providing a catch-all  ) and are identified by globally unique identifiers (GUIDs). \nSimilar to Code Signing, adversaries may abuse this architecture to subvert trust controls and bypass security policies that allow only legitimately signed code to execute on a system. Adversaries may hijack SIP and trust provider components to mislead operating system and whitelisting tools to classify malicious (or any) code as signed by: \n\nModifying the Dll and FuncName Registry values in HKLM\\SOFTWARE[\\WOW6432Node]Microsoft\\Cryptography\\OID\\EncodingType 0\\CryptSIPDllGetSignedDataMsg{SIP_GUID} that point to the dynamic link library (DLL) providing a SIP\u2019s CryptSIPDllGetSignedDataMsg function, which retrieves an encoded digital certificate from a signed file. By pointing to a maliciously-crafted DLL with an exported function that always returns a known good signature value (ex: a Microsoft signature for Portable Executables) rather than the file\u2019s real signature, an adversary can apply an acceptable signature value to all files using that SIP  (although a hash mismatch will likely occur, invalidating the signature, since the hash returned by the function will not match the value computed from the file).\nModifying the Dll and FuncName Registry values in HKLM\\SOFTWARE[WOW6432Node]Microsoft\\Cryptography\\OID\\EncodingType 0\\CryptSIPDllVerifyIndirectData{SIP_GUID} that point to the DLL providing a SIP\u2019s CryptSIPDllVerifyIndirectData function, which validates a file\u2019s computed hash against the signed hash value. By pointing to a maliciously-crafted DLL with an exported function that always returns TRUE (indicating that the validation was successful), an adversary can successfully validate any file (with a legitimate signature) using that SIP  (with or without hijacking the previously mentioned CryptSIPDllGetSignedDataMsg function). This Registry value could also be redirected to a suitable exported function from an already present DLL, avoiding the requirement to drop and execute a new file on disk.\nModifying the DLL and Function Registry values in HKLM\\SOFTWARE[WOW6432Node]Microsoft\\Cryptography\\Providers\\Trust\\FinalPolicy{trust provider GUID} that point to the DLL providing a trust provider\u2019s FinalPolicy function, which is where the decoded and parsed signature is checked and the majority of trust decisions are made. Similar to hijacking SIP\u2019s CryptSIPDllVerifyIndirectData function, this value can be redirected to a suitable exported function from an already present DLL or a maliciously-crafted DLL (though the implementation of a trust provider is complex).\nNote: The above hijacks are also possible without modifying the Registry via DLL Search Order Hijacking.\n\nHijacking SIP or trust provider components can also enable persistent code execution, since these malicious components may be invoked by any application that performs code signing or signature validation. ",
+              "signatures": [
+                {
+                  "severity": "UNKNOWN",
+                  "description": "The binary has an Authenticode signature"
+                },
+                {
+                  "severity": "UNKNOWN",
+                  "description": "The file have a Trusted Certificate"
+                }
+              ]
+            },
+            {
+              "id": "T1140",
+              "name": "Deobfuscate/Decode Files or Information",
+              "link": "https://attack.mitre.org/techniques/T1140/",
+              "description": "Adversaries may use Obfuscated Files or Information to hide artifacts of an intrusion from analysis. They may require separate mechanisms to decode or deobfuscate that information depending on how they intend to use it. Methods for doing that include built-in functionality of malware or by using utilities present on the system.\nOne such example is the use of certutil to decode a remote access tool portable executable file that has been hidden inside a certificate file. Another example is using the Windows copy /b or type command to reassemble binary fragments into a malicious payload.\nSometimes a user's action may be required to open it for deobfuscation or decryption as part of User Execution. The user may also be required to input a password to open a password protected compressed/encrypted file that was provided by the adversary.",
+              "signatures": [
+                {
+                  "severity": "UNKNOWN",
+                  "description": "Detected an attempt to pull out some data from the binary image"
+                }
+              ]
+            },
+            {
+              "id": "T1089",
+              "name": "Disabling Security Tools",
+              "link": "https://attack.mitre.org/techniques/T1089/",
+              "description": "Adversaries may disable security tools to avoid possible detection of their tools and activities. This can take the form of killing security software or event logging processes, deleting Registry keys so that tools do not start at run time, or other methods to interfere with security scanning or event reporting.",
+              "signatures": [
+                {
+                  "severity": "UNKNOWN",
+                  "description": "The process has tried to suspend a sandbox-related thread (possible sandbox evasion attempt)"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "TA0007",
+          "name": "Discovery",
+          "link": "https://attack.mitre.org/tactics/TA0007/",
+          "description": "The adversary is trying to figure out your environment.\n\nDiscovery consists of techniques an adversary may use to gain knowledge about the system and internal network. These techniques help adversaries observe the environment and orient themselves before deciding how to act. They also allow adversaries to explore what they can control and what\u2019s around their entry point in order to discover how it could benefit their current objective. Native operating system tools are often used toward this post-compromise information-gathering objective. ",
+          "techniques": [
+            {
+              "id": "T1057",
+              "name": "Process Discovery",
+              "link": "https://attack.mitre.org/techniques/T1057/",
+              "description": "Adversaries may attempt to get information about running processes on a system. Information obtained could be used to gain an understanding of common software/applications running on systems within the network. Administrator or otherwise elevated access may provide better process details. Adversaries may use the information from Process Discovery during automated discovery to shape follow-on behaviors, including whether or not the adversary fully infects the target and/or attempts specific actions.\nIn Windows environments, adversaries could obtain details on running processes using the Tasklist utility via cmd or Get-Process via PowerShell. Information about processes can also be extracted from the output of Native API calls such as CreateToolhelp32Snapshot. In Mac and Linux, this is accomplished with the ps command. Adversaries may also opt to enumerate processes via /proc. ESXi also supports use of the ps command, as well as esxcli system process list.\nOn network devices, Network Device CLI commands such as show processes can be used to display current running processes.",
+              "signatures": [
+                {
+                  "severity": "UNKNOWN",
+                  "description": "The process has tried to detect the debugger probing the use of page guards."
+                },
+                {
+                  "severity": "UNKNOWN",
+                  "description": "The process attempted to detect a running debugger using common APIs"
+                }
+              ]
+            },
+            {
+              "id": "T1082",
+              "name": "System Information Discovery",
+              "link": "https://attack.mitre.org/techniques/T1082/",
+              "description": "An adversary may attempt to get detailed information about the operating system and hardware, including version, patches, hotfixes, service packs, and architecture. Adversaries may use this information to shape follow-on behaviors, including whether or not the adversary fully infects the target and/or attempts specific actions. This behavior is distinct from Local Storage Discovery which is an adversary's discovery of local drive, disks and/or volumes.\nTools such as Systeminfo can be used to gather detailed system information. If running with privileged access, a breakdown of system data can be gathered through the systemsetup configuration tool on macOS. Adversaries may leverage a Network Device CLI on network devices to gather detailed system information (e.g. show version). On ESXi servers, threat actors may gather system information from various esxcli utilities, such as system hostname get and system version get.\nInfrastructure as a Service (IaaS) cloud providers such as AWS, GCP, and Azure allow access to instance and virtual machine information via APIs. Successful authenticated API calls can return data such as the operating system platform and status of a particular instance or the model view of a virtual machine.\nSystem Information Discovery combined with information gathered from other forms of discovery and reconnaissance can drive payload development and concealment. ",
+              "signatures": [
+                {
+                  "severity": "UNKNOWN",
+                  "description": "Queries for the computername"
+                }
+              ]
+            },
+            {
+              "id": "T1063",
+              "name": "Security Software Discovery",
+              "link": "https://attack.mitre.org/techniques/T1063/",
+              "description": "Adversaries may attempt to get a listing of security software, configurations, defensive tools, and sensors that are installed on the system. This may include things such as local firewall rules and anti-virus. Adversaries may use the information from Security Software Discovery during automated discovery to shape follow-on behaviors, including whether or not the adversary fully infects the target and/or attempts specific actions.\nWindows\nExample commands that can be used to obtain security software information are netsh, reg query with Reg, dir with cmd, and Tasklist, but other indicators of discovery behavior may be more specific to the type of software or security system the adversary is looking for.\nMac\nIt's becoming more common to see macOS malware perform checks for LittleSnitch and KnockKnock software.",
+              "signatures": [
+                {
+                  "severity": "UNKNOWN",
+                  "description": "It Tries to detect injection methods"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "links": {
+    "self": "https://www.virustotal.com/api/v3/files/48e927d1ead26b45f7ebe19e48ca7e3f2eb04cbf16aab837f8a7985ef1b01bdb/behaviour_mitre_trees"
+  }
+}
